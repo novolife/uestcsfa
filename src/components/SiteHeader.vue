@@ -1,34 +1,48 @@
 <script setup>
-import { RouterLink, useRoute } from 'vue-router'
+import { ref } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
+const router = useRouter()
+const logoClicks = ref(0)
+let clickTimer = null
+
 const navItems = [
   { path: '/', name: '首页' },
-  { path: '/about', name: '关于我们' },
+  { path: '/about', name: '关于' },
   { path: '/activities', name: '活动' },
-  { path: '/join', name: '加入我们' },
+  { path: '/join', name: '加入' },
 ]
 
 function isActive(path) {
   if (path === '/') return route.path === '/'
   return route.path.startsWith(path)
 }
+
+function onLogoClick(e) {
+  logoClicks.value += 1
+  if (clickTimer) clearTimeout(clickTimer)
+  clickTimer = setTimeout(() => { logoClicks.value = 0 }, 1500)
+  if (logoClicks.value >= 5) {
+    e.preventDefault()
+    logoClicks.value = 0
+    router.push('/ue-stc')
+  }
+}
 </script>
 
 <template>
   <header class="site-header">
     <div class="header-inner">
-      <RouterLink to="/" class="logo">
+      <RouterLink to="/" class="logo" @click="onLogoClick">
         <img
           class="logo-flag"
           src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Flag_of_SFA_of_UESTC.jpg/80px-Flag_of_SFA_of_UESTC.jpg"
-          alt="电子科技大学科幻协会旗帜"
+          alt=""
           width="40"
           height="30"
         />
-        <span class="logo-text">UESTC</span>
-        <span class="logo-divider">|</span>
-        <span class="logo-sfa">科幻协会</span>
+        <span class="logo-text">UESTC 科幻协会</span>
       </RouterLink>
       <nav class="nav">
         <RouterLink
@@ -47,18 +61,14 @@ function isActive(path) {
 
 <style scoped>
 .site-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(15, 23, 42, 0.9);
-  backdrop-filter: blur(12px);
+  background: var(--color-bg-soft);
   border-bottom: 1px solid var(--color-border);
 }
 
 .header-inner {
-  max-width: 1200px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 1rem 1.5rem;
+  padding: 0.75rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -67,63 +77,52 @@ function isActive(path) {
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.25rem;
+  gap: 0.5rem;
   color: var(--color-heading);
-  letter-spacing: 0.05em;
-}
-
-.logo-flag {
-  width: 40px;
-  height: 30px;
-  object-fit: cover;
-  border-radius: 4px;
-  border: 1px solid var(--color-border);
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .logo:hover {
   color: var(--color-accent);
+  text-decoration: none;
 }
 
-.logo-divider {
-  color: var(--color-accent);
-  font-weight: 500;
+.logo-flag {
+  width: 36px;
+  height: 27px;
+  object-fit: cover;
 }
 
 .nav {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
 .nav-link {
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.75rem;
   color: var(--color-text-mute);
-  font-size: 0.95rem;
-  border-radius: 6px;
-  transition: color 0.2s, background 0.2s;
+  font-size: 0.9rem;
 }
 
 .nav-link:hover {
   color: var(--color-text);
-  background: rgba(99, 102, 241, 0.12);
+  text-decoration: none;
 }
 
 .nav-link.active {
   color: var(--color-accent);
-  background: rgba(99, 102, 241, 0.18);
+  font-weight: 500;
 }
 
 @media (max-width: 640px) {
   .header-inner {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .nav {
     flex-wrap: wrap;
-    justify-content: center;
+    gap: 0.75rem;
+  }
+  .nav {
+    width: 100%;
+    justify-content: flex-end;
   }
 }
 </style>

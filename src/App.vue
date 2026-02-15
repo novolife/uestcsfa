@@ -1,16 +1,26 @@
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import SiteHeader from './components/SiteHeader.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import { RouterView } from 'vue-router'
+
+const route = useRoute()
+const isCommandRoute = computed(() => route.path.startsWith('/ue-stc'))
 </script>
 
 <template>
   <div class="app-layout">
-    <SiteHeader />
-    <main class="main-content">
+    <template v-if="!isCommandRoute">
+      <SiteHeader />
+      <main class="main-content">
+        <RouterView />
+      </main>
+      <SiteFooter />
+    </template>
+    <template v-else>
       <RouterView />
-    </main>
-    <SiteFooter />
+    </template>
   </div>
 </template>
 
@@ -23,9 +33,9 @@ import { RouterView } from 'vue-router'
 
 .main-content {
   flex: 1;
-  max-width: 1200px;
+  max-width: 960px;
   width: 100%;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  padding: 2rem 1.25rem;
 }
 </style>
