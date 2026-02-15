@@ -16,7 +16,7 @@ import { RouterLink } from 'vue-router'
         <span class="line1">电子科技大学</span>
         <span class="line2">科幻协会</span>
       </h1>
-      <p class="hero-desc">探索想象边界，共筑科幻梦想</p>
+      <p class="hero-desc">探索想象边界，共筑科幻梦想 · 第 35 届银河奖最佳科幻团体</p>
       <div class="hero-actions">
         <RouterLink to="/join" class="btn btn-primary">加入我们</RouterLink>
         <RouterLink to="/activities" class="btn btn-outline">近期活动</RouterLink>
@@ -26,8 +26,8 @@ import { RouterLink } from 'vue-router'
     <section class="intro section">
       <h2 class="section-title">关于协会</h2>
       <p class="intro-text">
-        电子科技大学科幻协会（UESTC-SFA）是成电校园内热爱科幻、幻想文学与科普的同学们共同的家园。
-        我们举办读书会、观影、写作与讨论，参与高校科幻平台与赛事，让想象力在现实与未来之间自由驰骋。
+        电子科技大学科幻协会（UESTC-SFA）成立于 2018 年，现有成员约 300 人，是成电校园内热爱科幻、幻想文学与科普的同学们共同的家园。
+        我们开展征文、观影、桌游、创作与交流，参与中国国际科幻大会等志愿服务，2024 年荣获第 35 届银河奖「最佳科幻团体奖」，让想象力在现实与未来之间自由驰骋。
       </p>
       <RouterLink to="/about" class="link-more">了解更多 →</RouterLink>
     </section>
@@ -37,18 +37,18 @@ import { RouterLink } from 'vue-router'
       <div class="feature-grid">
         <div class="feature-card">
           <FontAwesomeIcon :icon="['fas', 'book-open']" class="feature-icon" aria-hidden="true" />
-          <h3>读书与观影</h3>
-          <p>共读经典科幻作品，一起观看科幻影视，分享解读与脑洞。</p>
+          <h3>征文与创作</h3>
+          <p>科幻征文比赛、电影剧情创作，参与高校科幻赛事与《科幻世界》等平台。</p>
         </div>
         <div class="feature-card">
           <FontAwesomeIcon :icon="['fas', 'pen-fancy']" class="feature-icon" aria-hidden="true" />
-          <h3>创作与征文</h3>
-          <p>写作、评论与投稿，在高校科幻平台发出成电声音。</p>
+          <h3>桌游与观影</h3>
+          <p>科幻桌游大赛、观影交流，在游戏与影像中体验科幻世界。</p>
         </div>
         <div class="feature-card">
           <FontAwesomeIcon :icon="['fas', 'users']" class="feature-icon" aria-hidden="true" />
-          <h3>活动与交流</h3>
-          <p>主题沙龙、嘉宾分享、线下聚会，结识同好、拓展视野。</p>
+          <h3>交流与志愿</h3>
+          <p>友校交流、参观编辑部、中国国际科幻大会等志愿服务。</p>
         </div>
       </div>
     </section>
