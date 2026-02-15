@@ -33,11 +33,23 @@ import { RouterLink } from 'vue-router'
 
     <section class="doing">
       <h2 class="doing-title">我们在做什么</h2>
-      <ul class="doing-list">
-        <li>科幻征文比赛、电影剧情创作</li>
-        <li>科幻桌游大赛、观影交流</li>
-        <li>参观《科幻世界》编辑部、友校交流、科幻大会志愿</li>
-      </ul>
+      <div class="doing-grid">
+        <div class="doing-box">
+          <FontAwesomeIcon :icon="['fas', 'pen-fancy']" class="doing-icon" aria-hidden="true" />
+          <h3 class="doing-box-title">征文与创作</h3>
+          <p class="doing-box-desc">科幻征文比赛、电影剧情创作。</p>
+        </div>
+        <div class="doing-box">
+          <FontAwesomeIcon :icon="['fas', 'book-open']" class="doing-icon" aria-hidden="true" />
+          <h3 class="doing-box-title">桌游与观影</h3>
+          <p class="doing-box-desc">科幻桌游大赛、观影交流。</p>
+        </div>
+        <div class="doing-box">
+          <FontAwesomeIcon :icon="['fas', 'users']" class="doing-icon" aria-hidden="true" />
+          <h3 class="doing-box-title">交流与志愿</h3>
+          <p class="doing-box-desc">参观《科幻世界》编辑部、友校交流、科幻大会志愿。</p>
+        </div>
+      </div>
     </section>
   </div>
 </template>
@@ -119,14 +131,39 @@ import { RouterLink } from 'vue-router'
   font-size: 1rem;
   font-weight: 600;
   color: var(--color-heading);
+  margin-bottom: 1rem;
+}
+
+.doing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.doing-box {
+  padding: 1.25rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-soft);
+}
+
+.doing-icon {
+  display: block;
+  font-size: 1.5rem;
+  color: var(--color-accent);
   margin-bottom: 0.5rem;
 }
 
-.doing-list {
+.doing-box-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-heading);
+  margin-bottom: 0.35rem;
+}
+
+.doing-box-desc {
+  font-size: 0.9rem;
+  color: var(--color-text-mute);
+  line-height: 1.5;
   margin: 0;
-  padding-left: 1.25rem;
-  font-size: 0.95rem;
-  color: var(--color-text);
-  line-height: 1.8;
 }
 </style>

@@ -45,3 +45,10 @@ a:hover {
   color: var(--color-accent-hover);
   text-decoration: underline;
 }
+
+/* 隐藏文字：与背景同色，选中后可见。用于页面内隐藏线索。 */
+.hidden-clue {
+  color: var(--color-bg);
+  user-select: text;
+  -webkit-user-select: text;
+}

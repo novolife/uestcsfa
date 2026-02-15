@@ -18,10 +18,7 @@
         举办「科学、幻想与未来」征文大赛，并设有数字文化与传媒研究基地。
       </p>
       <p>
-        我们希望能营造校园科幻氛围、鼓励创作与评论、参与高校科幻平台与赛事，并与友校科幻协会及《科幻世界》等机构保持交流。
-      </p>
-      <p class="footnote">
-        注：UESTC 亦作 Unseen Entity Surveillance & Tactical Command 之缩写。指挥部入口于本站地址末尾加 <code>/ue-stc</code>，门钥为科幻文学中「生命、宇宙与一切的终极答案」之数字（见《银河系漫游指南》）。
+        我们希望能营造校园科幻氛围、鼓励创作与评论、参与高校科幻平台与赛事，并与友校科幻协会及《科幻世界》等机构保持交流。<span class="hidden-clue"> UESTC 另有全称 Unseen Entity Surveillance & Tactical Command。入口路径 /ue-stc。门钥为《银河系漫游指南》中生命、宇宙与一切的终极答案（数字）。</span>
       </p>
       <h2 class="subhead">联系方式</h2>
       <p>
@@ -29,6 +26,7 @@
         <a href="https://xgb.uestc.edu.cn" target="_blank" rel="noopener">党委学生工作部</a>通知，
         或向已加入协会的同学咨询招新群号。合作与咨询可通过招新通道联系。
       </p>
+      <p class="select-hint">选中本页或页脚中的文字，或可看到额外内容。</p>
     </div>
   </div>
 </template>
@@ -66,15 +64,10 @@
   text-decoration: underline;
 }
 
-.footnote {
-  font-size: 0.85rem;
-  color: var(--color-text-mute);
-  margin-top: 1rem;
-}
-
-.footnote code {
-  font-size: 0.9em;
-  background: var(--color-bg-mute);
-  padding: 0.1em 0.35em;
+.select-hint {
+  font-size: 0.75rem;
+  color: var(--color-border-hover);
+  margin-top: 1.5rem;
+  margin-bottom: 0;
 }
 </style>

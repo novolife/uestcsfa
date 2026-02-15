@@ -22,6 +22,11 @@ const router = createRouter({
       component: () => import('../views/ActivitiesView.vue'),
     },
     {
+      path: '/activities/reports/:slug',
+      name: 'activity-report',
+      component: () => import('../views/ActivityReportView.vue'),
+    },
+    {
       path: '/join',
       name: 'join',
       component: () => import('../views/JoinView.vue'),
@@ -42,6 +47,12 @@ const router = createRouter({
       path: '/ue-stc/intel',
       name: 'command-intel',
       component: () => import('../views/CommandIntelView.vue'),
+      meta: { command: true, requiresAuth: true },
+    },
+    {
+      path: '/ue-stc/about',
+      name: 'command-about',
+      component: () => import('../views/CommandAboutView.vue'),
       meta: { command: true, requiresAuth: true },
     },
   ],
