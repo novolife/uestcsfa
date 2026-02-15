@@ -1,0 +1,64 @@
+/* 电子科技大学科幻协会 - 主色：灰色 + 靛蓝，主图形：死星与鸽子 */
+:root {
+  --color-bg: #0f172a;
+  --color-bg-soft: #1e293b;
+  --color-bg-mute: #334155;
+  --color-border: rgba(99, 102, 241, 0.25);
+  --color-border-hover: rgba(99, 102, 241, 0.5);
+  --color-accent: #6366f1;
+  --color-accent-dim: #818cf8;
+  --color-text: #e2e8f0;
+  --color-text-mute: #94a3b8;
+  --color-heading: #f1f5f9;
+  --font-display: 'Orbitron', 'Noto Sans SC', sans-serif;
+  --font-body: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  font-weight: normal;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--color-text);
+  background: var(--color-bg);
+  line-height: 1.6;
+  font-family: var(--font-body);
+  font-size: 15px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 背景装饰：灰蓝渐变 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.1), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(30, 41, 59, 0.5), transparent),
+    radial-gradient(ellipse 60% 40% at 0% 0%, rgba(99, 102, 241, 0.05), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color 0.2s, opacity 0.2s;
+}
+
+a:hover {
+  color: var(--color-accent-dim);
+}
