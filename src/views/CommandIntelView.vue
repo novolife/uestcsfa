@@ -13,14 +13,15 @@ onMounted(() => {
   }
 })
 
+// 各战区地点：不可见实体活跃度 + 巡逻覆盖率
 const intelList = [
-  { theater: '西南战区', location: '成都·沙河', status: '监视中', action: '常规覆盖，无异常' },
-  { theater: '西南战区', location: '成都·清水河', status: '监视中', action: '校园节点稳定' },
-  { theater: '西南战区', location: '绵阳', status: '待命', action: '—' },
-  { theater: '华北战区', location: '北京·海淀', status: '监视中', action: '友单位协同' },
-  { theater: '华北战区', location: '天津', status: '待命', action: '—' },
-  { theater: '华东战区', location: '上海', status: '监视中', action: '情报收集中' },
-  { theater: '华南战区', location: '深圳', status: '待命', action: '—' },
+  { theater: '西南战区', location: '成都·沙河', activity: '低', coverage: 92 },
+  { theater: '西南战区', location: '成都·清水河', activity: '中', coverage: 88 },
+  { theater: '西南战区', location: '绵阳', activity: '低', coverage: 45 },
+  { theater: '华北战区', location: '北京·石景山', activity: '中', coverage: 78 },
+  { theater: '华北战区', location: '天津', activity: '低', coverage: 52 },
+  { theater: '华东战区', location: '上海', activity: '高', coverage: 85 },
+  { theater: '华南战区', location: '深圳', activity: '低', coverage: 38 },
 ]
 </script>
 
@@ -32,27 +33,32 @@ const intelList = [
       </template>
     </CommandHeader>
     <main class="intel-main">
-      <h1 class="intel-title">当前情报列表</h1>
-      <p class="intel-desc">各战区各地点行动情况。本数据仅供娱乐，与任何真实机构无关。</p>
+      <h1 class="intel-title">实体与巡逻情报</h1>
+      <p class="intel-desc">各战区地点不可见实体活跃情况与巡逻覆盖率。本数据仅供娱乐，与任何真实机构无关。</p>
       <div class="intel-table-wrap">
         <table class="intel-table">
-        <thead>
-          <tr>
-            <th>战区</th>
-            <th>地点</th>
-            <th>状态</th>
-            <th>行动概要</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(row, i) in intelList" :key="i">
-            <td>{{ row.theater }}</td>
-            <td>{{ row.location }}</td>
-            <td><span class="status-tag" :class="row.status === '监视中' ? 'active' : ''">{{ row.status }}</span></td>
-            <td>{{ row.action }}</td>
-          </tr>
-        </tbody>
-      </table>
+          <thead>
+            <tr>
+              <th>战区</th>
+              <th>地点</th>
+              <th>实体活跃度</th>
+              <th>巡逻覆盖率</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, i) in intelList" :key="i">
+              <td>{{ row.theater }}</td>
+              <td>{{ row.location }}</td>
+              <td><span class="activity-tag" :class="row.activity">{{ row.activity }}</span></td>
+              <td>
+                <span class="coverage-bar-wrap" :title="`${row.coverage}%`">
+                  <span class="coverage-bar" :style="{ width: row.coverage + '%' }" />
+                  <span class="coverage-num">{{ row.coverage }}%</span>
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </main>
   </div>
@@ -103,12 +109,42 @@ const intelList = [
   font-weight: 600;
 }
 
-.status-tag {
-  color: #555;
+.activity-tag {
+  font-size: 0.8rem;
+  color: #888;
 }
 
-.status-tag.active {
+.activity-tag.低 {
   color: #6a6;
+}
+
+.activity-tag.中 {
+  color: #996;
+}
+
+.activity-tag.高 {
+  color: #a66;
+}
+
+.coverage-bar-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 6rem;
+}
+
+.coverage-bar {
+  display: inline-block;
+  height: 6px;
+  min-width: 2px;
+  background: #444;
+  border-radius: 1px;
+}
+
+.coverage-num {
+  font-size: 0.8rem;
+  color: #777;
+  min-width: 2.5em;
 }
 
 @media (max-width: 640px) {
@@ -124,7 +160,7 @@ const intelList = [
   }
 
   .intel-table {
-    min-width: 480px;
+    min-width: 380px;
   }
 }
 </style>

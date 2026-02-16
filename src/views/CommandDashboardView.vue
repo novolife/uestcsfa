@@ -34,6 +34,14 @@ const priorityActions = [
   { location: '成都·清水河', level: '高', brief: '校园节点例行巡检' },
   { location: '成都·沙河', level: '高', brief: '与《科幻世界》杂志社联络通道维持' },
 ]
+
+// 各战区巡逻覆盖率（首页简图，详情见情报页）
+const coverageByTheater = [
+  { name: '西南', pct: 75 },
+  { name: '华北', pct: 65 },
+  { name: '华东', pct: 85 },
+  { name: '华南', pct: 38 },
+]
 </script>
 
 <template>
@@ -61,7 +69,18 @@ const priorityActions = [
             <span class="priority-brief">{{ a.brief }}</span>
           </div>
         </div>
-        <RouterLink to="/ue-stc/intel" class="link-more">查看完整情报列表</RouterLink>
+        <RouterLink to="/ue-stc/ops" class="link-more">前往行动页</RouterLink>
+      </section>
+      <section class="dash-section coverage">
+        <h2>巡逻覆盖率</h2>
+        <div class="coverage-strip">
+          <RouterLink v-for="c in coverageByTheater" :key="c.name" to="/ue-stc/intel" class="coverage-item" :title="`${c.name} ${c.pct}%`">
+            <span class="coverage-name">{{ c.name }}</span>
+            <span class="coverage-bar-bg"><span class="coverage-bar-fill" :style="{ width: c.pct + '%' }" /></span>
+            <span class="coverage-pct">{{ c.pct }}%</span>
+          </RouterLink>
+        </div>
+        <RouterLink to="/ue-stc/intel" class="link-more">详情见情报页</RouterLink>
       </section>
       <section class="dash-section">
         <p><RouterLink to="/ue-stc/about" class="link-more">关于指挥部</RouterLink></p>
@@ -164,5 +183,52 @@ const priorityActions = [
 
 .link-more:hover {
   color: #777;
+}
+
+.coverage-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.coverage-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #666;
+  text-decoration: none;
+}
+
+.coverage-item:hover {
+  color: #888;
+}
+
+.coverage-name {
+  min-width: 2.5em;
+  color: #777;
+}
+
+.coverage-bar-bg {
+  flex: 1;
+  max-width: 8rem;
+  height: 6px;
+  background: #1a1a1a;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.coverage-bar-fill {
+  display: block;
+  height: 100%;
+  background: #444;
+  border-radius: 2px;
+}
+
+.coverage-pct {
+  min-width: 2.5em;
+  font-size: 0.75rem;
+  color: #555;
 }
 </style>

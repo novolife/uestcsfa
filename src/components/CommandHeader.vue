@@ -29,6 +29,7 @@ watch(() => route.path, closeMenu)
     <span class="command-header-logo">{{ logo }}</span>
     <nav class="command-header-nav" aria-label="主导航">
       <RouterLink to="/ue-stc/dashboard" class="command-header-link" :class="{ active: isActive('/ue-stc/dashboard') }">首页</RouterLink>
+      <RouterLink to="/ue-stc/ops" class="command-header-link" :class="{ active: isActive('/ue-stc/ops') }">行动</RouterLink>
       <RouterLink to="/ue-stc/intel" class="command-header-link" :class="{ active: isActive('/ue-stc/intel') }">情报</RouterLink>
       <RouterLink to="/ue-stc/about" class="command-header-link" :class="{ active: isActive('/ue-stc/about') }">关于</RouterLink>
     </nav>
@@ -50,6 +51,7 @@ watch(() => route.path, closeMenu)
   <div class="command-header-dropdown" :class="{ open: menuOpen }" :aria-hidden="!menuOpen">
     <nav class="command-header-dropdown-inner" aria-label="折叠菜单">
       <RouterLink to="/ue-stc/dashboard" class="command-header-dropdown-link" :class="{ active: isActive('/ue-stc/dashboard') }" @click="closeMenu">首页</RouterLink>
+      <RouterLink to="/ue-stc/ops" class="command-header-dropdown-link" :class="{ active: isActive('/ue-stc/ops') }" @click="closeMenu">行动</RouterLink>
       <RouterLink to="/ue-stc/intel" class="command-header-dropdown-link" :class="{ active: isActive('/ue-stc/intel') }" @click="closeMenu">情报</RouterLink>
       <RouterLink to="/ue-stc/about" class="command-header-dropdown-link" :class="{ active: isActive('/ue-stc/about') }" @click="closeMenu">关于</RouterLink>
     </nav>

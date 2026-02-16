@@ -50,6 +50,12 @@ const router = createRouter({
       meta: { command: true, requiresAuth: true },
     },
     {
+      path: '/ue-stc/ops',
+      name: 'command-ops',
+      component: () => import('../views/CommandOpsView.vue'),
+      meta: { command: true, requiresAuth: true },
+    },
+    {
       path: '/ue-stc/about',
       name: 'command-about',
       component: () => import('../views/CommandAboutView.vue'),
