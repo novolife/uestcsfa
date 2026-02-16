@@ -1,7 +1,10 @@
 <script setup>
+import { ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
 const route = useRoute()
+const menuOpen = ref(false)
+
 const navItems = [
   { path: '/', name: '首页' },
   { path: '/about', name: '关于' },
@@ -13,6 +16,14 @@ function isActive(path) {
   if (path === '/') return route.path === '/'
   return route.path.startsWith(path)
 }
+
+function toggleMenu() {
+  menuOpen.value = !menuOpen.value
+}
+
+watch(() => route.path, () => {
+  menuOpen.value = false
+})
 </script>
 
 <template>
@@ -29,13 +40,38 @@ function isActive(path) {
         <span class="logo-text">UESTC 科幻协会</span>
         <span class="logo-hint">42</span>
       </RouterLink>
-      <nav class="nav">
+      <nav class="nav" aria-label="主导航">
         <RouterLink
           v-for="item in navItems"
           :key="item.path"
           :to="item.path"
           class="nav-link"
           :class="{ active: isActive(item.path) }"
+        >
+          {{ item.name }}
+        </RouterLink>
+      </nav>
+      <button
+        type="button"
+        class="menu-toggle"
+        aria-label="打开菜单"
+        :aria-expanded="menuOpen"
+        @click="toggleMenu"
+      >
+        <span class="menu-toggle-bar" />
+        <span class="menu-toggle-bar" />
+        <span class="menu-toggle-bar" />
+      </button>
+    </div>
+    <div class="nav-dropdown" :class="{ open: menuOpen }" :aria-hidden="!menuOpen">
+      <nav class="nav-dropdown-inner" aria-label="折叠菜单">
+        <RouterLink
+          v-for="item in navItems"
+          :key="item.path"
+          :to="item.path"
+          class="nav-dropdown-link"
+          :class="{ active: isActive(item.path) }"
+          @click="menuOpen = false"
         >
           {{ item.name }}
         </RouterLink>
@@ -113,14 +149,77 @@ function isActive(path) {
   font-weight: 500;
 }
 
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-mute);
+}
+
+.menu-toggle-bar {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: currentColor;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.nav-dropdown {
+  display: none;
+  overflow: hidden;
+  background: var(--color-bg-soft);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.nav-dropdown.open {
+  display: block;
+}
+
+.nav-dropdown-inner {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 1.25rem 0.75rem;
+  gap: 0.25rem;
+}
+
+.nav-dropdown-link {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.nav-dropdown-link:hover {
+  background: var(--color-bg-mute);
+  color: var(--color-accent);
+}
+
+.nav-dropdown-link.active {
+  color: var(--color-accent);
+  font-weight: 500;
+}
+
 @media (max-width: 640px) {
-  .header-inner {
-    flex-wrap: wrap;
-    gap: 0.75rem;
-  }
   .nav {
-    width: 100%;
-    justify-content: flex-end;
+    display: none;
+  }
+
+  .menu-toggle {
+    display: flex;
+  }
+}
+
+@media (min-width: 641px) {
+  .nav-dropdown {
+    display: none !important;
   }
 }
 </style>

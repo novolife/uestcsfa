@@ -13,8 +13,8 @@ import { RouterLink } from 'vue-router'
         height="150"
       />
       <h1 class="hero-title">电子科技大学科幻协会</h1>
-      <p class="hero-meta">2017 年成立 · 约 300 人 · 第 35 届银河奖最佳科幻团体</p>
-      <p class="hero-desc">征文、观影、桌游、创作与交流。成电校园里的科幻同好聚集地。</p>
+      <p class="hero-meta">2017 年成立 · 第 35 届银河奖最佳科幻团体</p>
+      <p class="hero-desc">征文、观影、桌游、创作与交流<br />成电校园里的科幻同好聚集地</p>
       <RouterLink to="/join" class="btn">加入我们</RouterLink>
     </section>
 
