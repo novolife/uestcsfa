@@ -55,6 +55,17 @@ const router = createRouter({
       component: () => import('../views/CommandAboutView.vue'),
       meta: { command: true, requiresAuth: true },
     },
+    {
+      path: '/ue-stc/:pathMatch(.*)*',
+      name: 'command-not-found',
+      component: () => import('../views/CommandNotFoundView.vue'),
+      meta: { command: true },
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('../views/NotFoundView.vue'),
+    },
   ],
 })
 

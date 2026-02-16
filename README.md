@@ -1,6 +1,8 @@
 # 电子科技大学科幻协会官网
 
-[电子科技大学科幻协会](https://www.uestc.edu.cn)（UESTC-SFA）官方网站。探索想象边界，共筑科幻梦想。
+[电子科技大学](https://www.uestc.edu.cn)科幻协会（UESTC-SFA）官方网站。探索想象边界，共筑科幻梦想。
+
+- **在线地址**：[https://novolife.github.io/uestcsfa/](https://novolife.github.io/uestcsfa/)（由 [GitHub Actions](.github/workflows/deploy.yml) 自动部署）
 
 ## 技术栈
 
@@ -31,6 +33,8 @@ npm run build
 
 ### 预览构建结果
 
+本地预览会使用与线上一致的 base 路径 `/uestcsfa/`：
+
 ```sh
 npm run preview
 ```
@@ -41,6 +45,10 @@ npm run preview
 npm run lint
 npm run format
 ```
+
+## 部署
+
+项目配置为发布到 **GitHub Pages**（仓库 [novolife/uestcsfa](https://github.com/novolife/uestcsfa)）。在仓库 **Settings → Pages** 中将 Source 选为 **GitHub Actions** 后，推送到 `master` 分支或手动运行 workflow 即可更新站点。
 
 ## 许可证
 
