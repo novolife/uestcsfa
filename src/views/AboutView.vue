@@ -22,11 +22,10 @@
       </p>
       <h2 class="subhead">联系方式</h2>
       <p>
-        招新一般在每学年开学季进行。请关注校内社团联合招新及
+        招新一般在每学年开学季进行。请关注校内社团联合招新（百团大战）及
         <a href="https://xgb.uestc.edu.cn" target="_blank" rel="noopener">党委学生工作部</a>通知，
         或向已加入协会的同学咨询招新群号。合作与咨询可通过招新通道联系。
       </p>
-      <p class="select-hint">选中本页或页脚中的文字，或可看到额外内容。</p>
     </div>
   </div>
 </template>
@@ -64,10 +63,4 @@
   text-decoration: underline;
 }
 
-.select-hint {
-  font-size: 0.75rem;
-  color: var(--color-border-hover);
-  margin-top: 1.5rem;
-  margin-bottom: 0;
-}
 </style>
