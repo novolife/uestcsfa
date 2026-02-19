@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -8,6 +8,12 @@ const password = ref('')
 const error = ref('')
 
 const AUTH_STORAGE = 'ue-stc-auth'
+
+onMounted(() => {
+  if (sessionStorage.getItem(AUTH_STORAGE)) {
+    router.replace('/ue-stc/dashboard')
+  }
+})
 
 async function sha256(text) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))

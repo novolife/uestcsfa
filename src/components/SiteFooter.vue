@@ -1,5 +1,13 @@
 <script setup>
+import { ref } from 'vue'
+import { RouterLink } from 'vue-router'
+
 const year = new Date().getFullYear()
+const revealed = ref(false)
+
+function reveal() {
+  revealed.value = true
+}
 </script>
 
 <template>
@@ -9,7 +17,9 @@ const year = new Date().getFullYear()
       <p class="meta">
         <a href="https://www.uestc.edu.cn" target="_blank" rel="noopener">电子科技大学</a>
         <span> · </span>
-        <span>© {{ year }} </span><span class="secret-hint"><span class="secret-link-default"> UESTC-SFA</span><span class="secret-link-hover"> ue-stc</span></span>
+        <span>© {{ year }}</span>
+        <span v-if="!revealed" class="secret-hint" role="button" tabindex="0" @click="reveal" @keydown.enter="reveal">UESTC-SFA</span>
+        <RouterLink v-else to="/ue-stc" class="secret-hint secret-link">ue-stc</RouterLink>
         <span> · </span>
         <a href="https://commons.wikimedia.org/wiki/File:Flag_of_SFA_of_UESTC.jpg" target="_blank" rel="noopener">旗帜图片来源</a> (CC BY 4.0)
       </p>
@@ -48,22 +58,17 @@ const year = new Date().getFullYear()
 
 .secret-hint {
   display: inline-block;
-  position: relative;
+  margin-left: 0.25em;
   color: inherit;
+  cursor: pointer;
 }
 
-.secret-link-hover {
-  position: absolute;
-  left: 0;
-  top: 0;
-  display: none;
+.secret-hint.secret-link {
+  text-decoration: none;
+  cursor: pointer;
 }
 
-.secret-hint:hover .secret-link-default {
-  visibility: hidden;
-}
-
-.secret-hint:hover .secret-link-hover {
-  display: inline;
+.secret-hint.secret-link:hover {
+  text-decoration: underline;
 }
 </style>
