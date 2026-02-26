@@ -118,4 +118,12 @@ onMounted(loadReport)
   padding-left: 1.25rem;
   margin-bottom: 1rem;
 }
+
+.report-body :deep(img) {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1rem auto;
+  border: 1px solid var(--color-border);
+}
 </style>

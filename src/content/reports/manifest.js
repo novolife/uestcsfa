@@ -15,6 +15,18 @@ export default [
       summary: '协会获中国科幻最高奖「最佳科幻团体奖」，为学校学生社团首次。',
     },
     {
+      slug: '2024-dune2-joint-screening',
+      title: '《沙丘 2》成都高校联合观影活动举行',
+      date: '2024-03',
+      summary: '协会组织《沙丘 2》IMAX 联合观影，围绕影片叙事、影像与主题展开跨校交流。',
+    },
+    {
+      slug: '2023-oppenheimer-joint-screening',
+      title: '《奥本海默》成都高校联合观影活动举行',
+      date: '2023-09',
+      summary: '协会发起《奥本海默》联合观影并组织映后讨论，延续“观影 + 交流”社群活动形式。',
+    },
+    {
       slug: '2022-sci-fi-writing-camp',
       title: '学校联合《科幻世界》主办首届科幻写作训练营',
       date: '2022',
