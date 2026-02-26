@@ -104,6 +104,39 @@ watch(() => route.path, closeMenu)
   flex-shrink: 0;
 }
 
+/* 覆盖插槽内容的样式：强制改为灰色，避免全局 accent 干扰 */
+.command-header-right :deep(span) {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.command-header-right :deep(a) {
+  font-size: 0.85rem;
+  color: #888;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.command-header-right :deep(a):hover {
+  color: #ccc;
+}
+
+.command-header-right :deep(button) {
+  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
+  color: #888;
+  background: transparent;
+  border: 1px solid #333;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.command-header-right :deep(button):hover {
+  color: #ccc;
+  border-color: #555;
+  background: #222;
+}
+
 .command-header-toggle {
   display: none;
   flex-direction: column;
@@ -164,14 +197,11 @@ watch(() => route.path, closeMenu)
     display: flex;
   }
 
-  .command-header-right :deep(span) {
-    font-size: 0.8rem;
-  }
-
+  /* 移动端调整插槽内容 */
+  .command-header-right :deep(span),
   .command-header-right :deep(a),
   .command-header-right :deep(button) {
     font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
   }
 }
 

@@ -20,6 +20,17 @@
       <p>
         我们希望能营造校园科幻氛围、鼓励创作与评论、参与高校科幻平台与赛事，并与友校科幻协会及《科幻世界》等机构保持交流。<span class="hidden-clue"> UESTC 另有全称 Unseen Entity Surveillance & Tactical Command。入口路径 /ue-stc。门钥为《银河系漫游指南》中生命、宇宙与一切的终极答案（数字）。</span>
       </p>
+
+      <h2 class="subhead">社团形象：星璃</h2>
+      <p>
+        星璃（Xingli）是电子科技大学科幻协会的看板娘与虚拟形象，活跃在社团的各类宣传与周边中。以下是星璃的表情包系列：
+      </p>
+      <div class="mascot-grid">
+        <div v-for="i in 9" :key="i" class="mascot-item">
+          <img :src="`/uestcsfa/images/mascot/xingli${i}.png`" :alt="`星璃表情包 ${i}`" loading="lazy">
+        </div>
+      </div>
+
       <h2 class="subhead">联系方式</h2>
       <p>
         招新一般在每学年开学季进行。请关注校内社团联合招新（百团大战）及
@@ -61,6 +72,46 @@
 
 .prose a:hover {
   text-decoration: underline;
+}
+
+.mascot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+@media (min-width: 640px) {
+  .mascot-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.mascot-item {
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  aspect-ratio: 1;
+}
+
+.mascot-item:hover {
+  transform: translateY(-5px);
+  border-color: var(--color-highlight);
+  box-shadow: 0 5px 15px rgba(25, 5, 250, 0.3);
+  background: rgba(25, 5, 250, 0.1);
+}
+
+.mascot-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
 }
 
 </style>

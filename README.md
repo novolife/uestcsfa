@@ -13,6 +13,9 @@
 
 ## 开发
 
+### 环境配置
+推荐使用 nvm 管理，
+
 ### 安装依赖
 
 ```sh
@@ -54,4 +57,3 @@ npm run format
 
 本项目采用 [MIT License](LICENSE)。
 
-协会旗帜图片来自 [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Flag_of_SFA_of_UESTC.jpg)，作者 MspreilsCN，采用 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) 许可。
