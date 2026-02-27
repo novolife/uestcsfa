@@ -431,24 +431,56 @@ function nextShape() {
 function resizeCanvas() {
   if (canvasRef.value && canvasRef.value.parentElement) {
     const parent = canvasRef.value.parentElement
-    // 使用 getBoundingClientRect 获取更准确的显示尺寸
     const rect = parent.getBoundingClientRect()
     canvasRef.value.width = rect.width
     canvasRef.value.height = rect.height
     
-    // 响应式调整半径
+    let targetRadius = 180
+    let targetCount = 1200
+
+    // 响应式调整目标参数
     if (window.innerWidth < 768) {
-        config.baseRadius = 120 // 手机端
-        config.particleCount = 600
-    } else {
-        config.baseRadius = 180
-        config.particleCount = 1200
+        targetRadius = 120 // 手机端
+        targetCount = 600
+    } 
+    
+    // 更新配置
+    config.baseRadius = targetRadius
+    
+    // 平滑调整粒子数量 (增量更新，而非销毁重建)
+    if (particles.length !== targetCount) {
+        if (particles.length < targetCount) {
+            // 需要增加粒子
+            const startIdx = particles.length
+            const currentShape = shapeKeys[currentShapeIndex]
+            
+            // 临时更新 config.particleCount 以便 setTarget 正确计算分布
+            config.particleCount = targetCount 
+            
+            for (let i = startIdx; i < targetCount; i++) {
+                const p = new Particle(i)
+                // 新粒子继承当前形态
+                p.setTarget(currentShape)
+                // 初始位置设为目标位置，避免从零点炸开的突兀感，看起来像是在空隙中生成
+                p.x = p.tx
+                p.y = p.ty
+                p.z = p.tz
+                particles.push(p)
+            }
+        } else {
+            // 需要减少粒子：直接截断
+            particles.splice(targetCount)
+            config.particleCount = targetCount
+        }
     }
     
-    // 如果粒子数不一致，重新生成
-    if (particles.length !== config.particleCount) {
-         initParticles()
-    }
+    // 关键：所有粒子的目标位置都需要根据新的 baseRadius 和 particleCount 重新计算
+    // 这样现有粒子会“飞”向新的位置，产生平滑的缩放/重组动画，而不是瞬间重置
+    const currentShape = shapeKeys[currentShapeIndex]
+    particles.forEach(p => {
+        p.setTarget(currentShape)
+        // 不重置 p.x/y/z，保留缓动效果
+    })
   }
 }
 

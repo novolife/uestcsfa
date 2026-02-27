@@ -30,7 +30,6 @@ onMounted(() => {
     </div>
 
     <div class="footer-content">
-      <!-- 左侧：版权信息与入口 -->
       <div class="footer-left">
         <div class="copyright">
           <span class="copy-symbol">&copy;</span>
@@ -45,25 +44,34 @@ onMounted(() => {
           </RouterLink>
         </div>
         
-        <a href="https://www.uestc.edu.cn/" target="_blank" rel="noopener noreferrer" class="school-link">
-          &lt; 电子科技大学 &gt;
-        </a>
-
-        <div class="system-status">
-          <span class="status-dot"></span>
-          <span class="status-text">SYSTEM ONLINE</span>
-        </div>
-      </div>
-
-      <!-- 右侧：数据装饰 -->
-      <div class="footer-right">
-        <div class="data-block">
-          <span class="data-label">COORD:</span>
-          <span class="data-value">{{ coordinates }}</span>
-        </div>
-        <div class="data-block">
-          <span class="data-label">VER:</span>
-          <span class="data-value">2.0.99</span>
+        <div class="friendly-links">
+          <a href="https://www.uestc.edu.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
+            电子科技大学
+          </a>
+          <span class="sep">|</span>
+          <a href="https://csfdb.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
+            中文科幻数据库
+          </a>
+          <span class="sep">|</span>
+          <a href="https://sci.kpcswa.org.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
+            科普科幻青年之星
+          </a>
+          <span class="sep">|</span>
+          <a href="https://khyjzx.crsp.org.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
+            中国科幻研究中心
+          </a>
+          <span class="sep">|</span>
+          <a href="https://www.0gsf.com/" target="_blank" rel="noopener noreferrer" class="link-item">
+            零重力科幻
+          </a>
+          <span class="sep">|</span>
+          <a href="https://hubingsf.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
+            斛兵群星科幻协会
+          </a>
+          <span class="sep">|</span>
+          <a href="https://www.sfjiulong.org/" target="_blank" rel="noopener noreferrer" class="link-item">
+            久隆计划
+          </a>
         </div>
       </div>
     </div>
@@ -140,43 +148,30 @@ onMounted(() => {
   gap: 0.5rem;
 }
 
-.system-status {
+.friendly-links {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 0.5rem;
-  font-size: 0.7rem;
-  color: #0f0; /* 绿色状态 */
-  text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
 }
 
-.status-dot {
-  width: 6px;
-  height: 6px;
-  background: #0f0;
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-.school-link {
+.link-item {
   color: var(--color-text-mute);
   text-decoration: none;
-  font-size: 0.75rem;
   transition: all 0.3s;
-  width: fit-content;
   opacity: 0.8;
-  letter-spacing: 0.05em;
 }
 
-.school-link:hover {
+.link-item:hover {
   color: var(--color-highlight);
   text-shadow: 0 0 8px var(--color-highlight);
   opacity: 1;
 }
 
-@keyframes pulse {
-  0% { opacity: 0.4; transform: scale(0.8); }
-  50% { opacity: 1; transform: scale(1.2); }
-  100% { opacity: 0.4; transform: scale(0.8); }
+.sep {
+  color: var(--color-text-mute);
+  opacity: 0.3;
 }
 
 /* 中间 */
@@ -214,45 +209,12 @@ onMounted(() => {
   100% { opacity: 1; }
 }
 
-/* 右侧 */
-.footer-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.25rem;
-  text-align: right;
-}
-
-.data-block {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.data-label {
-  color: var(--color-text-mute);
-  opacity: 0.7;
-}
-
-.data-value {
-  color: var(--color-text);
-  font-family: monospace;
-}
-
 /* 移动端适配 */
 @media (max-width: 768px) {
   .footer-content {
     flex-direction: column;
     align-items: center;
     text-align: center;
-  }
-  
-  .footer-right {
-    align-items: center;
-  }
-  
-  .footer-center {
-    order: -1; /* 把入口放最上面方便点击 */
-    margin-bottom: 0.5rem;
   }
 }
 </style>
