@@ -10,62 +10,135 @@ const DECIPHER_MISSION_STORAGE = 'ue-stc-decipher-mission'
 const DECIPHER_DONE_TASK_STORAGE = 'ue-stc-decipher-done-task'
 
 const mission = ref({ taskId: '', rewardPoints: 10 })
-const stem = ref('壬')
-const branch = ref('子')
-const base = ref('hex')
-const codeInput = ref('')
+const currentStep = ref(1)
 const isDecoded = ref(false)
 
-const energyInfo = ref({
-  timestamp: '2026-03-12 21:40:00',
-  anomaly: '高热 / 爆裂',
-  wuxing: '火',
+const branches = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥']
+const elements = ['木', '火', '土', '金', '水']
+const counterMap = {
+  木: '金',
+  火: '水',
+  土: '木',
+  金: '火',
+  水: '土',
+}
+const elementButtonLabel = {
+  木: '绿 / 木',
+  火: '红 / 火',
+  土: '黄 / 土',
+  金: '白 / 金',
+  水: '黑 / 水',
+}
+
+const scenario = ref({
+  element: '火',
+  clue: '警报：目标区域温度异常升高，侦测到大量红色光谱。',
+  virtualHour: 14,
+  countdownHour: 2,
+  targetBranch: '申',
+  difficulty: 'simple',
 })
 
 const logs = ref([
-  '[系统] 时空共鸣预测模块已接入。',
-  '[系统] UE降临规律已与干支历法模型建立映射。',
-  '[任务] 请完成：参数收集 -> 干支推演 -> 代码解密。',
+  '[系统] 时空共鸣预测模块已启动。',
+  '[系统] 任务流程：频率捕捉 -> 时空拨盘 -> 属性覆盖。',
 ])
 
-const targetGanzhi = computed(() => {
-  // 当前异常属性为火，按照五行生克以水克火
-  return '壬子'
-})
+const guessedElement = ref('')
+const selectedBranchIndex = ref(0)
+const selectedInject = ref('')
 
-const targetCode = computed(() => {
-  return base.value === 'hex' ? '5850' : '130120'
+const virtualTimeLabel = computed(() => `${String(scenario.value.virtualHour).padStart(2, '0')}:00`)
+const targetTimeLabel = computed(() => {
+  const h = (scenario.value.virtualHour + scenario.value.countdownHour) % 24
+  return `${String(h).padStart(2, '0')}:00`
 })
+const selectedBranch = computed(() => branches[selectedBranchIndex.value])
+const counterElement = computed(() => counterMap[scenario.value.element])
 
-onMounted(() => {
-  if (!sessionStorage.getItem(AUTH_STORAGE)) {
-    router.replace('/ue-stc')
-    return
+function hourToBranch(hour) {
+  const idx = Math.floor(((hour + 1) % 24) / 2)
+  return branches[idx]
+}
+
+function randomInt(min, max) {
+  return min + Math.floor(Math.random() * (max - min + 1))
+}
+
+function randomPick(list) {
+  return list[Math.floor(Math.random() * list.length)]
+}
+
+function initScenario() {
+  const element = randomPick(elements)
+  const difficulty = Math.random() < 0.45 ? 'simple' : 'advanced'
+  const virtualHour = randomInt(0, 23)
+  const countdownHour = randomPick([1, 2, 2, 3])
+  const targetHour = (virtualHour + countdownHour) % 24
+  const targetBranch = hourToBranch(targetHour)
+
+  const cluePool = {
+    木: [
+      '侦测到藤蔓状干涉丝快速增殖，结构呈枝化扩散。',
+      '目标点出现大面积绿色谱线，周边支撑结构被根系样纹理侵蚀。',
+    ],
+    火: [
+      '警报：目标区域温度异常升高，侦测到大量红色光谱，引发周围植被迅速枯萎。',
+      '观测到连续爆裂脉冲与灼蚀反应，空气离子化明显增强。',
+    ],
+    土: [
+      '地层波形出现钝化回响，重压场导致地面缓慢塌陷。',
+      '目标区域呈黄褐色固化反应，空间粘滞度显著上升。',
+    ],
+    金: [
+      '金属构件发生高频共振并扭曲，边缘出现锐化裂纹。',
+      '白色反射谱异常增强，切割型噪波持续攀升。',
+    ],
+    水: [
+      '环境温度骤降并伴随黑色雾化潮汐，液态干涉层快速扩张。',
+      '侦测到强渗透与回卷流，局部空间表现出深水般拖拽效应。',
+    ],
   }
-  const raw = sessionStorage.getItem(DECIPHER_MISSION_STORAGE)
-  if (raw) {
-    mission.value = JSON.parse(raw)
+
+  scenario.value = {
+    element,
+    clue: difficulty === 'simple' ? `系统提示：目标属${element}。` : randomPick(cluePool[element]),
+    virtualHour,
+    countdownHour,
+    targetBranch,
+    difficulty,
+  }
+}
+
+function rotateDial(delta) {
+  selectedBranchIndex.value = (selectedBranchIndex.value + delta + 12) % 12
+}
+
+function confirmStep1() {
+  if (!guessedElement.value) return
+  if (guessedElement.value === scenario.value.element) {
+    currentStep.value = 2
+    logs.value.push(`[通过] 频率捕捉完成：目标属性判定为 ${scenario.value.element}。`)
   } else {
-    // 非任务入口时回退
-    router.replace('/ue-stc/ops')
+    logs.value.push('[失败] 频率判定错误，请重新根据线索判断实体属性。')
   }
-})
+}
 
-function submitDecode() {
-  const selectedGanzhi = `${stem.value}${branch.value}`
-  const code = codeInput.value.trim().toLowerCase()
-  if (!code) return
-
-  logs.value.push(`> 推演结果: ${selectedGanzhi} / 编码制式: ${base.value} / 代码: ${code}`)
-  codeInput.value = ''
-
-  if (selectedGanzhi !== targetGanzhi.value) {
-    logs.value.push('[失败] 干支推演错误。提示：当前为火性异常，请选择可制火的水相干支。')
-    return
+function confirmStep2() {
+  if (selectedBranch.value === scenario.value.targetBranch) {
+    currentStep.value = 3
+    logs.value.push(`[通过] 时空通道已锁定：${selectedBranch.value}时。`)
+  } else {
+    logs.value.push(`[失败] 拨盘错位，目标时间窗对应 ${scenario.value.targetBranch} 时。`)
   }
+}
 
-  if (code !== targetCode.value.toLowerCase()) {
-    logs.value.push(`[失败] 代码映射错误。提示：${targetGanzhi.value} 在当前制式应映射为 ${targetCode.value}。`)
+function confirmStep3(element) {
+  selectedInject.value = element
+  if (element !== counterElement.value) {
+    logs.value.push(
+      `[失败] 注入属性错误。当前实体为${scenario.value.element}，应使用${counterElement.value}进行中和。`,
+    )
     return
   }
 
@@ -75,12 +148,24 @@ function submitDecode() {
     sessionStorage.setItem(DECIPHER_DONE_TASK_STORAGE, mission.value.taskId)
   }
 
-  logs.value.push('[成功] 共振参数匹配，时空薄弱点已锁定。')
-  logs.value.push('[坐标] 30.6776 N, 104.0986 E')
-  logs.value.push('[时间窗] 2026-03-13 23:00-23:20（子时）')
+  logs.value.push('[成功] 赛博罗盘对位完成，降临通道已被反制。')
   logs.value.push(`[任务完成] 时空共鸣预测 +${mission.value.rewardPoints || 10} 积分`)
   isDecoded.value = true
 }
+
+onMounted(() => {
+  if (!sessionStorage.getItem(AUTH_STORAGE)) {
+    router.replace('/ue-stc')
+    return
+  }
+  const raw = sessionStorage.getItem(DECIPHER_MISSION_STORAGE)
+  if (!raw) {
+    router.replace('/ue-stc/ops')
+    return
+  }
+  mission.value = JSON.parse(raw)
+  initScenario()
+})
 </script>
 
 <template>
@@ -92,63 +177,110 @@ function submitDecode() {
     </CommandHeader>
 
     <main class="decipher-main">
-      <div class="star-bg"></div>
-
       <div class="console">
-        <section class="param-panel">
-          <h2>参数收集</h2>
-          <p>侦测时间戳：{{ energyInfo.timestamp }}</p>
-          <p>异常能量：{{ energyInfo.anomaly }}（五行属{{ energyInfo.wuxing }}）</p>
-          <p>推演原则：以五行生克制化，寻找可压制当前属性的干支窗口。</p>
+        <section class="scenario-card">
+          <h2>频率警报</h2>
+          <p>{{ scenario.clue }}</p>
+          <p class="meta">虚拟时间：{{ virtualTimeLabel }} ｜ 降临倒计时：{{ scenario.countdownHour }} 小时</p>
+          <p class="meta">难度：{{ scenario.difficulty === 'simple' ? '简单' : '进阶' }}</p>
         </section>
 
-        <div class="logs">
-          <div v-for="(line, idx) in logs" :key="idx" class="log-line">
-            {{ line }}
+        <section class="step-card" :class="{ done: currentStep > 1 }">
+          <h3>第一步：频率捕捉</h3>
+          <p>根据线索判断实体五行属性。</p>
+          <div class="btn-row">
+            <button
+              v-for="e in elements"
+              :key="`guess-${e}`"
+              type="button"
+              class="small-btn"
+              :class="{ active: guessedElement === e }"
+              @click="guessedElement = e"
+            >
+              {{ elementButtonLabel[e] }}
+            </button>
           </div>
-        </div>
+          <button type="button" class="action-btn" @click="confirmStep1" :disabled="isDecoded">确认属性</button>
+        </section>
 
-        <div class="input-area" v-if="!isDecoded">
-          <div class="pickers">
-            <label>天干
-              <select v-model="stem" class="picker">
-                <option>甲</option><option>乙</option><option>丙</option><option>丁</option><option>戊</option>
-                <option>己</option><option>庚</option><option>辛</option><option>壬</option><option>癸</option>
-              </select>
-            </label>
-            <label>地支
-              <select v-model="branch" class="picker">
-                <option>子</option><option>丑</option><option>寅</option><option>卯</option><option>辰</option><option>巳</option>
-                <option>午</option><option>未</option><option>申</option><option>酉</option><option>戌</option><option>亥</option>
-              </select>
-            </label>
-            <label>编码制式
-              <select v-model="base" class="picker">
-                <option value="hex">十六进制</option>
-                <option value="oct">八进制</option>
-              </select>
-            </label>
+        <section class="step-card" :class="{ locked: currentStep < 2, done: currentStep > 2 }">
+          <h3>第二步：时空拨盘</h3>
+          <p>将罗盘拨到目标降临时辰（{{ targetTimeLabel }}）。</p>
+          <div class="dial">
+            <button type="button" class="dial-btn" @click="rotateDial(-1)" :disabled="currentStep < 2 || isDecoded">◀</button>
+            <div class="dial-window">{{ selectedBranch }}</div>
+            <button type="button" class="dial-btn" @click="rotateDial(1)" :disabled="currentStep < 2 || isDecoded">▶</button>
           </div>
-          <div class="decode-line">
-            <span class="blinking-cursor">_</span>
-            <input
-              v-model="codeInput"
-              @keydown.enter="submitDecode"
-              type="text"
-              class="decipher-input"
-              :placeholder="base === 'hex' ? '输入十六进制代码' : '输入八进制代码'"
-              autocomplete="off"
-            />
-            <button @click="submitDecode" class="action-btn">解密坐标</button>
+          <div class="branch-grid">
+            <button
+              v-for="(b, i) in branches"
+              :key="`b-${b}`"
+              type="button"
+              class="branch-btn"
+              :class="{ active: selectedBranchIndex === i }"
+              @click="selectedBranchIndex = i"
+              :disabled="currentStep < 2 || isDecoded"
+            >
+              {{ b }}
+            </button>
           </div>
-        </div>
+          <button type="button" class="action-btn" @click="confirmStep2" :disabled="currentStep < 2 || isDecoded">
+            锁定时空通道
+          </button>
+        </section>
+
+        <section class="step-card" :class="{ locked: currentStep < 3 }">
+          <h3>第三步：属性覆盖</h3>
+          <p>按五行相克注入中和能量。</p>
+          <div class="btn-row">
+            <button
+              v-for="e in elements"
+              :key="`inject-${e}`"
+              type="button"
+              class="inject-btn"
+              :class="`el-${e}`"
+              :disabled="currentStep < 3 || isDecoded"
+              @click="confirmStep3(e)"
+            >
+              注入 {{ elementButtonLabel[e] }}
+            </button>
+          </div>
+          <p v-if="selectedInject" class="meta">最近注入：{{ selectedInject }}</p>
+        </section>
+
+        <section class="log-card">
+          <h3>终端日志</h3>
+          <div class="logs">
+            <div v-for="(line, idx) in logs" :key="idx" class="log-line">{{ line }}</div>
+          </div>
+        </section>
 
         <div v-if="isDecoded" class="victory">
-          <h3>★★★ 破译成功 ★★★</h3>
-          <p>下一次实体降临坐标已生成拦截任务。</p>
+          <h3>对位成功</h3>
+          <p>时空共鸣预测任务完成。</p>
           <button @click="router.push('/ue-stc/ops')" class="action-btn">返回行动中心</button>
         </div>
       </div>
+
+      <aside class="guide-panel">
+        <h2>UE-STC 快速入门手册</h2>
+        <p>
+          新人，别被古文吓到。所谓“五行”只是高维能量的五种衰变态，“十二时辰”是地球磁场的十二段波动周期。
+        </p>
+        <p>你只需要记住：看线索判断属性，拨到正确时辰，再用克制属性覆盖即可。</p>
+
+        <div class="memo-box">
+          <h3>行动辅助备忘录（时辰对照）</h3>
+          <p>23-01 子 ｜ 01-03 丑 ｜ 03-05 寅 ｜ 05-07 卯</p>
+          <p>07-09 辰 ｜ 09-11 巳 ｜ 11-13 午 ｜ 13-15 未</p>
+          <p>15-17 申 ｜ 17-19 酉 ｜ 19-21 戌 ｜ 21-23 亥</p>
+        </div>
+
+        <div class="memo-box">
+          <h3>五行相克</h3>
+          <p>金克木 ｜ 木克土 ｜ 土克水 ｜ 水克火 ｜ 火克金</p>
+        </div>
+      </aside>
     </main>
   </div>
 </template>
@@ -157,177 +289,169 @@ function submitDecode() {
 .command-decipher {
   min-height: 100vh;
   background: #03070f;
-  color: #0ff;
-  font-family: 'Fira Code', 'SimSun', monospace;
-  position: relative;
-  overflow: hidden;
-}
-
-.star-bg {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 760px;
-  height: 760px;
-  transform: translate(-50%, -50%);
-  border: 1px dashed rgba(0, 255, 255, 0.18);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
-  animation: spin 70s linear infinite;
-  background:
-    radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0) 65%),
-    repeating-conic-gradient(from 0deg, rgba(0, 255, 255, 0.05) 0 8deg, rgba(0, 0, 0, 0) 8deg 16deg);
-}
-
-@keyframes spin {
-  to { transform: translate(-50%, -50%) rotate(360deg); }
+  color: #9de;
 }
 
 .decipher-main {
-  position: relative;
-  z-index: 1;
-  max-width: 700px;
-  margin: 3rem auto;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 1.25rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 1rem;
+}
+
+.console,
+.guide-panel {
+  background: rgba(0, 16, 30, 0.74);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 6px;
   padding: 1rem;
 }
 
-.console {
-  background: rgba(0, 20, 35, 0.78);
-  border: 1px solid #0ff;
-  box-shadow: 0 0 24px rgba(0, 255, 255, 0.25);
-  padding: 2rem;
-  border-radius: 4px;
-  backdrop-filter: blur(4px);
+.scenario-card,
+.step-card,
+.log-card {
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  background: rgba(0, 10, 20, 0.55);
+  padding: 0.8rem;
+  margin-bottom: 0.8rem;
 }
 
-.param-panel {
-  margin-bottom: 1.2rem;
-  padding: 0.75rem;
-  border: 1px solid rgba(0, 255, 255, 0.25);
-  background: rgba(0, 12, 25, 0.55);
+.step-card.locked {
+  opacity: 0.55;
 }
 
-.param-panel h2 {
+.step-card.done {
+  border-color: rgba(120, 255, 120, 0.4);
+}
+
+h2,
+h3 {
   margin: 0 0 0.5rem;
-  font-size: 0.95rem;
+  color: #bff;
 }
 
-.param-panel p {
-  margin: 0.25rem 0;
+p {
+  margin: 0 0 0.45rem;
+  line-height: 1.6;
   font-size: 0.82rem;
 }
 
+.meta {
+  color: #8fb;
+  font-size: 0.78rem;
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+}
+
+.small-btn,
+.action-btn,
+.dial-btn,
+.branch-btn,
+.inject-btn {
+  border: 1px solid #3a7;
+  background: #0d2230;
+  color: #9de;
+  padding: 0.3rem 0.55rem;
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+.small-btn.active,
+.branch-btn.active {
+  border-color: #7ff;
+  color: #cff;
+}
+
+.action-btn:disabled,
+.dial-btn:disabled,
+.branch-btn:disabled,
+.inject-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dial {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.45rem 0;
+}
+
+.dial-window {
+  min-width: 3.2rem;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #fff;
+  border: 1px solid rgba(0, 255, 255, 0.4);
+  background: #06111b;
+  padding: 0.25rem 0.6rem;
+}
+
+.branch-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.35rem;
+  margin: 0.55rem 0;
+}
+
+.inject-btn.el-木 {
+  border-color: #49a85f;
+}
+
+.inject-btn.el-火 {
+  border-color: #c74b4b;
+}
+
+.inject-btn.el-土 {
+  border-color: #c7a34b;
+}
+
+.inject-btn.el-金 {
+  border-color: #bfc6cf;
+}
+
+.inject-btn.el-水 {
+  border-color: #3f6bb8;
+}
+
 .logs {
-  margin-bottom: 1.2rem;
-  min-height: 200px;
+  max-height: 150px;
+  overflow-y: auto;
 }
 
 .log-line {
-  margin-bottom: 0.5rem;
-  line-height: 1.6;
-  text-shadow: 0 0 2px #0ff;
-}
-
-.input-area {
-  display: grid;
-  gap: 0.8rem;
-  border-top: 1px solid rgba(0, 255, 255, 0.3);
-  padding-top: 1rem;
-}
-
-.pickers {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.pickers label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.8rem;
-}
-
-.picker {
-  background: rgba(0, 20, 30, 0.7);
-  color: #9ff;
-  border: 1px solid rgba(0, 255, 255, 0.4);
-  padding: 0.2rem 0.35rem;
-}
-
-.decode-line {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.blinking-cursor {
-  animation: blink 1s step-end infinite;
-}
-
-@keyframes blink {
-  50% { opacity: 0; }
-}
-
-.decipher-input {
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid #0ff;
-  color: #0ff;
-  font-family: inherit;
-  font-size: 1.1rem;
-  padding: 0.25rem;
-  width: 180px;
-  outline: none;
-  text-align: center;
-}
-
-.action-btn {
-  background: transparent;
-  border: 1px solid #0ff;
-  color: #0ff;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-family: inherit;
-}
-
-.action-btn:hover {
-  background: #0ff;
-  color: #000;
-  box-shadow: 0 0 10px #0ff;
+  font-size: 0.78rem;
+  color: #9cc;
+  margin-bottom: 0.3rem;
 }
 
 .victory {
-  text-align: center;
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px dashed #0ff;
+  border: 1px solid rgba(120, 255, 120, 0.45);
+  background: rgba(8, 30, 12, 0.45);
+  padding: 0.8rem;
 }
 
-.victory h3 {
-  color: #fff;
-  text-shadow: 0 0 10px #0ff;
-  margin-bottom: 1rem;
+.memo-box {
+  margin-top: 0.7rem;
+  border: 1px dashed rgba(0, 255, 255, 0.3);
+  background: rgba(0, 8, 16, 0.55);
+  padding: 0.55rem;
 }
 
-.victory p {
-  margin-bottom: 2rem;
-}
-
-@media (max-width: 640px) {
+@media (max-width: 900px) {
   .decipher-main {
-    margin: 1rem auto;
-    padding: 0.75rem;
+    grid-template-columns: 1fr;
   }
 
-  .console {
-    padding: 1rem;
-  }
-
-  .decode-line {
-    flex-wrap: wrap;
+  .branch-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 </style>
