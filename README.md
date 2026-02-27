@@ -14,7 +14,30 @@
 ## 开发
 
 ### 环境配置
-推荐使用 nvm 管理，
+
+本项目需要 Node.js 环境。
+
+- **Node.js**: 推荐使用 LTS 版本 (`^20.19.0` 或 `>=22.12.0`)。
+- **包管理器**: 推荐使用 `npm` (自带) 或 `pnpm`。
+- **IDE**: 推荐使用 [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (即 Volar) 插件。
+
+推荐使用 `nvm` (Node Version Manager) 或 `fnm` 来管理 Node.js 版本。
+
+#### 使用 nvm 配置 Node.js（推荐）
+
+1. 安装 `nvm`：
+   - Windows：安装 [nvm-windows](https://github.com/coreybutler/nvm-windows/releases)
+   - macOS / Linux：安装 [nvm-sh](https://github.com/nvm-sh/nvm)
+2. 安装并切换到项目推荐版本（以 Node.js 20 为例）：
+
+```sh
+nvm install latest
+nvm use 2x.xx.x (以实际安装版本为准)
+node -v
+npm -v
+```
+
+3. 验证输出版本符合要求后，再执行下方依赖安装步骤。
 
 ### 安装依赖
 
