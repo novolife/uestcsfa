@@ -232,6 +232,47 @@
   .scifi-core-container {
     width: 80vw;
     height: 80vw;
+    margin-left: -40vw; /* 居中修正 */
+    margin-top: -40vw;
   }
+
+  /* 性能优化：简化核心场景 */
+  .core-scene {
+    will-change: transform;
+  }
+
+  /* 性能优化：移除昂贵的混合模式和模糊 */
+  .inner-fire {
+    filter: none !important;
+    mix-blend-mode: normal !important;
+    opacity: 0.3;
+    animation: fire-pulse 3s ease-in-out infinite alternate !important;
+  }
+
+  /* 性能优化：停止面片变形动画，构建静态立方体 */
+  .face {
+    width: 160px !important;
+    height: 160px !important;
+    /* 居中修正：因为 face 是 absolute top:0 left:0，需要修正位置到中心 */
+    top: 50% !important;
+    left: 50% !important;
+    margin-top: -80px !important;
+    margin-left: -80px !important;
+    
+    animation: none !important; /* 停止变形 */
+    box-shadow: none !important; /* 移除阴影 */
+    border: 1px solid rgba(100, 200, 255, 0.6);
+    background: rgba(10, 20, 80, 0.3);
+    clip-path: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* 构建静态小立方体 (边长160px => translateZ 80px) */
+  .face-1 { transform: translateZ(80px); }
+  .face-2 { transform: rotateY(180deg) translateZ(80px); }
+  .face-3 { transform: rotateY(-90deg) translateZ(80px); }
+  .face-4 { transform: rotateY(90deg) translateZ(80px); }
+  .face-5 { transform: rotateX(90deg) translateZ(80px); }
+  .face-6 { transform: rotateX(-90deg) translateZ(80px); }
 }
 </style>
