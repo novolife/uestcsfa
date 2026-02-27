@@ -6,8 +6,9 @@ import { checkEmergencyTimeout, readEmergency, resolveEmergency } from '@/utils/
 
 const router = useRouter()
 const INVENTORY_STORAGE = 'ue-stc-inventory'
+const TAMPERED_BRIEF_STORAGE = 'ue-stc-tampered-brief'
 
-const contacts = [
+const baseContacts = [
   { id: 'ops', name: '行动调度台' },
   { id: 'agent', name: '前线干员-Δ7' },
   { id: 'logi', name: '后勤审批机器人' },
@@ -16,8 +17,17 @@ const contacts = [
 const selectedContact = ref('agent')
 const emergency = ref(null)
 const inventory = ref([])
+const tamperedBrief = ref(null)
 const now = ref(Date.now())
 let timer = null
+
+const contacts = computed(() => {
+  const list = [...baseContacts]
+  if (tamperedBrief.value) {
+    list.push({ id: 'legacy', name: '异常信道-旧简报' })
+  }
+  return list
+})
 
 const countdownMs = computed(() => {
   if (!emergency.value || emergency.value.status !== 'active') return 0
@@ -47,6 +57,21 @@ const chatLines = computed(() => {
     return [
       { from: '后勤机器人', text: '请先在物资调配终端完成 SKU 录入。' },
       { from: '后勤机器人', text: '审批完成后，返回本终端执行交付调拨。' },
+    ]
+  }
+  if (selectedContact.value === 'legacy') {
+    if (!tamperedBrief.value) {
+      return [{ from: '系统', text: '当前无异常简报。' }]
+    }
+    if (tamperedBrief.value.decoded) {
+      return [
+        { from: '旧档案', text: '前任调度员留言：不要相信基本地图，看看你自己的坐标。' },
+        { from: '系统', text: '注：该信息来源于遭篡改简报，可信度待核验。' },
+      ]
+    }
+    return [
+      { from: '异常信道', text: tamperedBrief.value.raw || '::ERR//NULL#SIG' },
+      { from: '系统', text: '该简报已被严重篡改，可尝试执行破译。' },
     ]
   }
 
@@ -83,6 +108,10 @@ const chatLines = computed(() => {
 function syncState() {
   emergency.value = checkEmergencyTimeout() || readEmergency()
   inventory.value = JSON.parse(sessionStorage.getItem(INVENTORY_STORAGE) || '[]')
+  tamperedBrief.value = JSON.parse(sessionStorage.getItem(TAMPERED_BRIEF_STORAGE) || 'null')
+  if (selectedContact.value === 'legacy' && !tamperedBrief.value) {
+    selectedContact.value = 'agent'
+  }
 }
 
 function deliverToAgent() {
@@ -90,6 +119,12 @@ function deliverToAgent() {
   inventory.value = inventory.value.filter((x) => x !== emergency.value.sku)
   sessionStorage.setItem(INVENTORY_STORAGE, JSON.stringify(inventory.value))
   emergency.value = resolveEmergency()
+}
+
+function decodeLegacyBrief() {
+  if (!tamperedBrief.value || tamperedBrief.value.decoded) return
+  tamperedBrief.value = { ...tamperedBrief.value, decoded: true }
+  sessionStorage.setItem(TAMPERED_BRIEF_STORAGE, JSON.stringify(tamperedBrief.value))
 }
 
 onMounted(() => {
@@ -129,7 +164,7 @@ onUnmounted(() => {
 
       <section class="chat-area">
         <div class="chat-head">
-          <h2>{{ contacts.find((c) => c.id === selectedContact)?.name }}</h2>
+          <h2>{{ contacts.find((c) => c.id === selectedContact)?.name || '通信终端' }}</h2>
           <span v-if="emergency && emergency.status === 'active'" class="danger-timer">生存倒计时 {{ countdownLabel }}</span>
         </div>
         <div class="chat-body">
@@ -141,6 +176,11 @@ onUnmounted(() => {
         <div class="chat-actions" v-if="selectedContact === 'agent'">
           <button type="button" class="action-btn" @click="router.push('/ue-stc/logistics')">前往后勤终端审批</button>
           <button type="button" class="action-btn strong" :disabled="!canDeliver" @click="deliverToAgent">交付调拨</button>
+        </div>
+        <div class="chat-actions" v-else-if="selectedContact === 'legacy'">
+          <button type="button" class="action-btn strong" :disabled="!tamperedBrief || tamperedBrief.decoded" @click="decodeLegacyBrief">
+            破译简报
+          </button>
         </div>
       </section>
     </main>

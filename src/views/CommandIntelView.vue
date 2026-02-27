@@ -74,6 +74,7 @@ function buyIntel(item) {
   sessionStorage.setItem(POINTS_STORAGE, String(points.value))
   sessionStorage.setItem(UNLOCKED_INTEL_STORAGE, JSON.stringify(unlockedIntelIds.value))
   if (item.id === 'director-log') unlockDecipherTask()
+  if (item.id === 'higher-map') enableContainmentOnlyMode()
   if (!selectedIntelId.value) selectedIntelId.value = item.id
 }
 
@@ -96,6 +97,21 @@ function unlockDecipherTask() {
     points: 10,
   })
   sessionStorage.setItem(AVAILABLE_TASKS_STORAGE, JSON.stringify(available))
+}
+
+function enableContainmentOnlyMode() {
+  const available = JSON.parse(sessionStorage.getItem(AVAILABLE_TASKS_STORAGE) || '[]')
+  const claimed = JSON.parse(sessionStorage.getItem(CLAIMED_TASKS_STORAGE) || '[]')
+  const nextAvailable = available.filter((t) => t.type !== '巡逻任务')
+  const nextClaimed = claimed.filter((t) => t.type !== '巡逻任务')
+  if (!nextAvailable.some((t) => t.type === '收容任务')) {
+    nextAvailable.unshift(
+      { id: 'c-unlock-1', type: '收容任务', theater: '核心战区', location: '未定裂隙', status: '待领取', points: 4 },
+      { id: 'c-unlock-2', type: '收容任务', theater: '西南战区', location: '成都·沙河', status: '待领取', points: 2 },
+    )
+  }
+  sessionStorage.setItem(AVAILABLE_TASKS_STORAGE, JSON.stringify(nextAvailable))
+  sessionStorage.setItem(CLAIMED_TASKS_STORAGE, JSON.stringify(nextClaimed))
 }
 </script>
 

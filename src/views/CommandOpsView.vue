@@ -18,6 +18,8 @@ const DECIPHER_DONE_TASK_STORAGE = 'ue-stc-decipher-done-task'
 const AVAILABLE_TASKS_STORAGE = 'ue-stc-available-tasks'
 const CLAIMED_TASKS_STORAGE = 'ue-stc-claimed-tasks'
 const TASK_COUNTER_STORAGE = 'ue-stc-task-counter'
+const UNLOCKED_INTEL_STORAGE = 'ue-stc-unlocked-intel'
+const TAMPERED_BRIEF_STORAGE = 'ue-stc-tampered-brief'
 
 const questState = ref(0)
 const points = ref(0)
@@ -62,16 +64,44 @@ const inventoryDisplay = computed(() => {
   return Object.entries(bucket).map(([name, count]) => ({ name, count }))
 })
 
-function seedFormalTasks() {
-  return [
-    { id: 'p-101', type: '巡逻任务', theater: '西南战区', location: '成都·清水河', status: '待领取', points: 1 },
-    { id: 'p-102', type: '巡逻任务', theater: '华北战区', location: '天津', status: '待领取', points: 2 },
-    { id: 'p-103', type: '巡逻任务', theater: '华东战区', location: '上海', status: '待领取', points: 3 },
-    { id: 'p-104', type: '巡逻任务', theater: '华南战区', location: '深圳', status: '待领取', points: 2 },
-    { id: 'c-201', type: '收容任务', theater: '西南战区', location: '成都·沙河', status: '待领取', points: 2 },
-    { id: 'c-202', type: '收容任务', theater: '核心战区', location: '未定裂隙', status: '待领取', points: 5 },
-    { id: 'a-301', type: '援助任务', theater: '外勤支援', location: '04号观察点', status: '待领取', points: 3 },
-    { id: 'm-401', type: '模因污染清洗任务', theater: '信息战区', location: '协会官网文章系统', status: '待领取', points: 5 },
+function isHigherMapUnlocked() {
+  const unlockedIntel = JSON.parse(sessionStorage.getItem(UNLOCKED_INTEL_STORAGE) || '[]')
+  return unlockedIntel.includes('higher-map')
+}
+
+function isDecipherUnlocked() {
+  const unlockedIntel = JSON.parse(sessionStorage.getItem(UNLOCKED_INTEL_STORAGE) || '[]')
+  return unlockedIntel.includes('director-log')
+}
+
+const TASK_POOLS = {
+  patrol: [
+    { type: '巡逻任务', theater: '西南战区', location: '成都·清水河', points: 1 },
+    { type: '巡逻任务', theater: '西南战区', location: '成都·沙河', points: 2 },
+    { type: '巡逻任务', theater: '西南战区', location: '绵阳', points: 1 },
+    { type: '巡逻任务', theater: '华北战区', location: '天津', points: 2 },
+    { type: '巡逻任务', theater: '华北战区', location: '北京·石景山', points: 3 },
+    { type: '巡逻任务', theater: '华东战区', location: '上海', points: 3 },
+    { type: '巡逻任务', theater: '华南战区', location: '深圳', points: 2 },
+  ],
+  containment: [
+    { type: '收容任务', theater: '西南战区', location: '成都·沙河', points: 2 },
+    { type: '收容任务', theater: '核心战区', location: '未定裂隙', points: 5 },
+    { type: '收容任务', theater: '核心战区', location: '时空干涉井', points: 4 },
+    { type: '收容任务', theater: '华东战区', location: '海上节点', points: 3 },
+    { type: '收容任务', theater: '华北战区', location: '地下掩体', points: 4 },
+  ],
+  aid: [
+    { type: '援助任务', theater: '外勤支援', location: '04号观察点', points: 3 },
+    { type: '援助任务', theater: '外勤支援', location: '联合观察点', points: 3 },
+    { type: '援助任务', theater: '后勤调拨', location: '前线补给站', points: 3 },
+  ],
+  memetic: [
+    { type: '模因污染清洗任务', theater: '信息战区', location: '协会文章', points: 5 },
+    { type: '模因污染清洗任务', theater: '信息战区', location: '协会文章', points: 5 },
+  ],
+  decipher: [
+    { type: '时空共鸣预测', theater: '核心战区', location: '时空干涉井', points: 10 },
   ]
 }
 
@@ -85,45 +115,82 @@ function randomFrom(list) {
   return list[Math.floor(Math.random() * list.length)]
 }
 
-function generateDynamicTask() {
-  // 低分任务刷新概率更高
-  const roll = Math.random()
-  if (roll < 0.55) {
-    const patrolPool = [
-      { theater: '西南战区', location: '成都·清水河' },
-      { theater: '华北战区', location: '天津' },
-      { theater: '华东战区', location: '上海' },
-      { theater: '华南战区', location: '深圳' },
-      { theater: '西南战区', location: '绵阳' },
-    ]
-    const p = randomFrom(patrolPool)
-    const pointRoll = Math.random()
-    const patrolPoints = pointRoll < 0.55 ? 1 : pointRoll < 0.85 ? 2 : 3
-    return { id: nextTaskId('p'), type: '巡逻任务', theater: p.theater, location: p.location, status: '待领取', points: patrolPoints }
-  }
-  if (roll < 0.8) {
-    const containmentPool = [
-      { theater: '西南战区', location: '成都·沙河', points: 2 },
-      { theater: '核心战区', location: '未定裂隙', points: 3 },
-      { theater: '华东战区', location: '海上节点', points: 2 },
-    ]
-    const c = randomFrom(containmentPool)
-    const pointRoll = Math.random()
-    const containmentPoints = pointRoll < 0.4 ? 2 : pointRoll < 0.7 ? 3 : pointRoll < 0.9 ? 4 : 5
-    return { id: nextTaskId('c'), type: '收容任务', theater: c.theater, location: c.location, status: '待领取', points: containmentPoints }
-  }
-  if (roll < 0.92) {
-    return { id: nextTaskId('a'), type: '援助任务', theater: '外勤支援', location: '联合观察点', status: '待领取', points: 3 }
-  }
-  return { id: nextTaskId('m'), type: '模因污染清洗任务', theater: '信息战区', location: '协会官网文章系统', status: '待领取', points: 5 }
+function getRandomFromPool(pool, count) {
+  const shuffled = [...pool].sort(() => 0.5 - Math.random())
+  return shuffled.slice(0, count)
 }
 
 function refillAvailableTasks() {
   if (!isFormal.value) return
-  const targetCount = 8
-  while (availableTasks.value.length < targetCount) {
-    availableTasks.value.push(generateDynamicTask())
+  
+  const higherMap = isHigherMapUnlocked()
+  const decipher = isDecipherUnlocked()
+  
+  if (higherMap) {
+    availableTasks.value = availableTasks.value.filter(t => t.type !== '巡逻任务')
   }
+  
+  const currentTypes = availableTasks.value.map(t => t.type)
+  const patrolCount = currentTypes.filter(t => t === '巡逻任务').length
+  const containmentCount = currentTypes.filter(t => t === '收容任务').length
+  const aidCount = currentTypes.filter(t => t === '援助任务').length
+  const memeticCount = currentTypes.filter(t => t === '模因污染清洗任务').length
+  const decipherCount = currentTypes.filter(t => t === '时空共鸣预测').length
+  
+  if (!higherMap && patrolCount < 3) {
+    const toAdd = getRandomFromPool(TASK_POOLS.patrol, 3 - patrolCount)
+    toAdd.forEach(t => availableTasks.value.push({ id: nextTaskId('p'), status: '待领取', ...t }))
+  }
+  if (higherMap && containmentCount < 3) {
+    const toAdd = getRandomFromPool(TASK_POOLS.containment, 3 - containmentCount)
+    toAdd.forEach(t => availableTasks.value.push({ id: nextTaskId('c'), status: '待领取', ...t }))
+  }
+  if (aidCount < 1) {
+    const toAdd = getRandomFromPool(TASK_POOLS.aid, 1)
+    toAdd.forEach(t => availableTasks.value.push({ id: nextTaskId('a'), status: '待领取', ...t }))
+  }
+  if (memeticCount < 1) {
+    const toAdd = getRandomFromPool(TASK_POOLS.memetic, 1)
+    toAdd.forEach(t => availableTasks.value.push({ id: nextTaskId('m'), status: '待领取', ...t }))
+  }
+  
+  const claimedTypes = claimedTasks.value.map(t => t.type)
+  if (decipher && decipherCount === 0 && !claimedTypes.includes('时空共鸣预测')) {
+    const toAdd = getRandomFromPool(TASK_POOLS.decipher, 1)
+    toAdd.forEach(t => availableTasks.value.push({ id: nextTaskId('d'), status: '待领取', ...t }))
+  }
+}
+
+function applyHigherMapTaskGate() {
+  if (!isHigherMapUnlocked()) return
+
+  const beforeAvailable = availableTasks.value.length
+  const beforeClaimed = claimedTasks.value.length
+  availableTasks.value = availableTasks.value.filter((t) => t.type !== '巡逻任务')
+  claimedTasks.value = claimedTasks.value.filter((t) => t.type !== '巡逻任务')
+  if (availableTasks.value.length !== beforeAvailable || claimedTasks.value.length !== beforeClaimed) {
+    latestLog.value = '高维地图图层已接入：巡逻任务下线，切换为收容优先模式。'
+  }
+  if (!availableTasks.value.some((t) => t.type === '收容任务')) {
+    availableTasks.value.unshift(
+      { id: nextTaskId('c'), type: '收容任务', theater: '核心战区', location: '未定裂隙', status: '待领取', points: 4 },
+      { id: nextTaskId('c'), type: '收容任务', theater: '西南战区', location: '成都·沙河', status: '待领取', points: 2 },
+    )
+  }
+}
+
+function maybeDropTamperedBriefFromPatrol() {
+  if (Math.random() >= 0.4) return
+  const raw = 'R4*#::UE-STC//map.false//k9=13...DONOTTRUST_BASEMAP...CHECK_SELF_COORD...'
+  sessionStorage.setItem(
+    TAMPERED_BRIEF_STORAGE,
+    JSON.stringify({
+      raw,
+      decoded: false,
+      createdAt: Date.now(),
+    }),
+  )
+  latestLog.value = '通信终端收到一条被篡改的旧简报，请前往异常信道查看。'
 }
 
 function persistTasks() {
@@ -259,7 +326,7 @@ function devAddPoints() {
   if (questState.value === 0) {
     questState.value = 1
     sessionStorage.setItem(QUEST_STORAGE, '1')
-    availableTasks.value = seedFormalTasks()
+    availableTasks.value = []
     claimedTasks.value = claimedTasks.value.filter((t) => t.id !== 'trainee-001')
     refillAvailableTasks()
     persistTasks()
@@ -301,9 +368,11 @@ onMounted(() => {
     claimedTasks.value = []
     persistTasks()
   } else {
-    availableTasks.value = savedAvailable ? JSON.parse(savedAvailable) : seedFormalTasks()
+    availableTasks.value = savedAvailable ? JSON.parse(savedAvailable) : []
     claimedTasks.value = savedClaimed ? JSON.parse(savedClaimed) : []
+    applyHigherMapTaskGate()
     refillAvailableTasks()
+    applyHigherMapTaskGate()
     persistTasks()
   }
 
@@ -313,14 +382,20 @@ onMounted(() => {
       markClaimedTaskDone(doneTaskId, '见习考核通过，转正完成。')
       questState.value = 1
       if (availableTasks.value.length <= 1 && availableTasks.value[0]?.id === 'trainee-001') {
-        availableTasks.value = seedFormalTasks()
+        availableTasks.value = []
         claimedTasks.value = claimedTasks.value.filter((t) => t.id !== 'trainee-001')
       }
       refillAvailableTasks()
       persistTasks()
     } else {
+      const doneTask = claimedTasks.value.find((t) => t.id === doneTaskId)
       markClaimedTaskDone(doneTaskId, '测绘任务完成，积分已结算。')
+      if (doneTask?.type === '巡逻任务') {
+        maybeDropTamperedBriefFromPatrol()
+      }
+      applyHigherMapTaskGate()
       refillAvailableTasks()
+      applyHigherMapTaskGate()
     }
     sessionStorage.removeItem(MAP_DONE_TASK_STORAGE)
   }

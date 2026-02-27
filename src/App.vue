@@ -5,6 +5,7 @@ import SiteHeader from './components/SiteHeader.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import SciFiCore from './components/SciFiCore.vue'
 import SciFiOverlay from './components/SciFiOverlay.vue'
+import TacticalClipboard from './components/TacticalClipboard.vue'
 import { RouterView } from 'vue-router'
 
 const route = useRoute()
@@ -13,6 +14,7 @@ const isCommandRoute = computed(() => route.path.startsWith('/ue-stc'))
 
 <template>
   <div class="app-root">
+    <TacticalClipboard />
     <!-- 
       关键修改：
       将 3D 核心和 Overlay 移到 .app-layout 之外，
