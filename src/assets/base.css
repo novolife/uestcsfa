@@ -48,17 +48,6 @@ a:hover {
   text-decoration: none;
 }
 
-/* 隐藏线索样式调整 */
-.hidden-clue {
-  color: transparent;
-  user-select: text;
-  -webkit-user-select: text;
-}
-.hidden-clue::selection {
-  background: var(--color-accent);
-  color: var(--color-bg);
-}
-
 /* 自定义滚动条 - 极简科技风 */
 ::-webkit-scrollbar {
   width: 6px;
