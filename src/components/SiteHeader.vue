@@ -7,9 +7,9 @@ const menuOpen = ref(false)
 
 const navItems = [
   { path: '/', name: 'CORE' },
-  { path: '/about', name: 'DATA' },
-  { path: '/activities', name: 'LOGS' },
-  { path: '/join', name: 'LINK' },
+  { path: '/about', name: '关于' },
+  { path: '/activities', name: '活动' },
+  { path: '/join', name: '联系' },
 ]
 
 function isActive(path) {

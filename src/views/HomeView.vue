@@ -18,7 +18,7 @@ import { RouterLink } from 'vue-router'
           成电校园里的科幻同好聚集地
         </p>
         <RouterLink to="/join" class="btn-activate">
-          <span class="btn-text">INITIATE LINK</span>
+          <span class="btn-text">JOIN US</span>
           <span class="btn-deco"></span>
         </RouterLink>
       </div>
@@ -42,10 +42,10 @@ import { RouterLink } from 'vue-router'
     <!-- 底部次级导航/介绍（可选） -->
     <section class="sub-deck">
       <p>
-        UESTC-SFA 致力于构建校园幻想文化节点。
-        <RouterLink to="/about" class="deck-link">DATA</RouterLink>
+        UESTC-SFA 致力于构建校园幻想文化节点
+        <RouterLink to="/about" class="deck-link">关于</RouterLink>
         <span class="sep">/</span>
-        <RouterLink to="/activities" class="deck-link">LOGS</RouterLink>
+        <RouterLink to="/activities" class="deck-link">活动</RouterLink>
       </p>
     </section>
   </div>
