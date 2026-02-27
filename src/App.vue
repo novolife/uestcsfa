@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import SiteHeader from './components/SiteHeader.vue'
 import SiteFooter from './components/SiteFooter.vue'
@@ -10,10 +10,23 @@ import { RouterView } from 'vue-router'
 
 const route = useRoute()
 const isCommandRoute = computed(() => route.path.startsWith('/ue-stc'))
+const isFormatted = ref(false)
+
+onMounted(() => {
+  if (localStorage.getItem('ue-stc-formatted') === 'true') {
+    isFormatted.value = true
+  }
+})
 </script>
 
 <template>
-  <div class="app-root">
+  <div v-if="isFormatted" class="formatted-reality">
+    <div class="static-content">
+      <h1>电子科技大学科幻协会</h1>
+      <p>欢迎加入科幻协会，我们的征途是星辰大海。</p>
+    </div>
+  </div>
+  <div v-else class="app-root">
     <TacticalClipboard />
     <!-- 
       关键修改：
@@ -93,5 +106,28 @@ const isCommandRoute = computed(() => route.path.startsWith('/ue-stc'))
   width: 100%;
   margin: 0 auto;
   padding: 2rem 1.25rem;
+}
+
+.formatted-reality {
+  min-height: 100vh;
+  background: #fff;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: sans-serif;
+  text-align: center;
+}
+
+.static-content h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  font-weight: normal;
+  letter-spacing: 2px;
+}
+
+.static-content p {
+  font-size: 1rem;
+  color: #666;
 }
 </style>

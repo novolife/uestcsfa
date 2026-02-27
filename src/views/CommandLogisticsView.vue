@@ -43,9 +43,33 @@ onMounted(() => {
   if (emergency.value?.status === 'active') {
     outputLines.value.push(`!!! 紧急审批中：${emergency.value.itemName} / SKU ${emergency.value.sku}`)
   }
+  
+  const claimedTasks = JSON.parse(sessionStorage.getItem('ue-stc-claimed-tasks') || '[]')
+  if (claimedTasks.some(t => t.type === '【极秘指令】零号基站物资调配' && t.status !== '已完成')) {
+    outputLines.value.push(`[系统提示] 接收到零号基站的极秘物资调配请求，需手动输入调度代码：DMP-X-000`)
+  }
+
   // 聚焦输入框
   if (inputRef.value) inputRef.value.focus()
 })
+
+function playAlarm() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)()
+  for(let i=0; i<15; i++) {
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = 'sawtooth'
+    osc.frequency.value = i % 2 === 0 ? 1200 : 800
+    
+    osc.connect(gain)
+    gain.connect(ctx.destination)
+    
+    gain.gain.value = 0.05
+    
+    osc.start(ctx.currentTime + i * 0.1)
+    osc.stop(ctx.currentTime + i * 0.1 + 0.08)
+  }
+}
 
 function submitCode() {
   const code = inputCode.value.trim().toUpperCase()
@@ -53,6 +77,46 @@ function submitCode() {
   
   outputLines.value.push(`> ${code}`)
   inputCode.value = ''
+
+  if (code === 'DMP-X-000') {
+    playAlarm()
+    const receipt = [
+      { text: '[ERROR] CONFLICT IN REQUISITION PROTOCOL', type: 'error' },
+      '- - - - - - - - - - - - - - - -',
+      'UPLOAD RECEIPT #99812',
+      'TYPE: BIOMETRIC ANCHOR',
+      'TARGET: ZERO-NODE',
+      '- - - - - - - - - - - - - - - -',
+      'SUBJECT: DISPATCHER-11',
+      'BRAINWAVE_FREQ: 14.8Hz (BETA)',
+      'RESONANCE_LVL: 98.7%',
+      'MASS_EXCHANGE: IN PROGRESS...',
+      '[=======>            ] 41%',
+      '- - - - - - - - - - - - - - - -',
+      { text: '//警告：质量置换不守恒。我们送出去的不是武器，他们在用武器的质量构建【坐标锚点】。去看看你的地图。校验码：[FRACTAL-7]', type: 'glitch-text error' }
+    ]
+    
+    let i = 0
+    inputRef.value.disabled = true // 临时禁用输入
+    const printInterval = setInterval(() => {
+      if (i < receipt.length) {
+        outputLines.value.push(receipt[i])
+        scrollToBottom()
+        i++
+      } else {
+        clearInterval(printInterval)
+        if (inputRef.value) inputRef.value.disabled = false
+        // 更新极秘任务状态
+        const claimed = JSON.parse(sessionStorage.getItem('ue-stc-claimed-tasks') || '[]')
+        const specialTask = claimed.find(t => t.type === '【极秘指令】零号基站物资调配')
+        if (specialTask) {
+          specialTask.status = '已完成'
+          sessionStorage.setItem('ue-stc-claimed-tasks', JSON.stringify(claimed))
+        }
+      }
+    }, 200)
+    return
+  }
 
   emergency.value = checkEmergencyTimeout() || readEmergency()
   if (emergency.value?.status === 'active') {
@@ -106,8 +170,8 @@ function scrollToBottom() {
       </div>
       <div class="pos-machine">
         <div class="pos-screen">
-          <div v-for="(line, idx) in outputLines" :key="idx" class="pos-line">
-            {{ line }}
+          <div v-for="(line, idx) in outputLines" :key="idx" class="pos-line" :class="typeof line === 'object' ? line.type : ''">
+            {{ typeof line === 'object' ? line.text : line }}
           </div>
           
           <div class="input-line">
@@ -220,6 +284,25 @@ function scrollToBottom() {
 
 .pos-input:focus {
   outline: none;
+}
+
+.error {
+  color: #ff3333;
+  font-weight: bold;
+}
+
+.glitch-text {
+  animation: log-glitch 0.2s linear infinite;
+  text-shadow: 2px 0 red, -2px 0 blue;
+}
+
+@keyframes log-glitch {
+  0% { transform: translate(0) }
+  20% { transform: translate(-2px, 1px) }
+  40% { transform: translate(2px, -1px) }
+  60% { transform: translate(-1px, 2px) }
+  80% { transform: translate(1px, -2px) }
+  100% { transform: translate(0) }
 }
 
 .success-action {

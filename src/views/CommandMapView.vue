@@ -48,6 +48,8 @@ const userInput = ref([])
 const targets = ref([])
 const targetModes = ref([])
 const terminalLines = ref(['> 测绘终端已连接。'])
+const calibrationCode = ref('')
+const isFractalRevealed = ref(false)
 
 const currentPatternMode = computed(() => targetModes.value[targetIndex.value] || 'simple')
 const isHardGraph = computed(() => currentPatternMode.value === 'hard')
@@ -237,6 +239,50 @@ const showPolyline = computed(() => {
   if (phase.value === 'input' || phase.value === 'success') return generatePolyline(userInput.value)
   return ''
 })
+
+const fractalEdges = computed(() => {
+  const edges = []
+  const cx = 50, cy = 50
+  const R = 300
+  for (let r = 50; r <= R; r += 50) {
+    for (let i = 0; i < 6; i++) {
+      const angle1 = i * Math.PI / 3
+      const angle2 = (i + 1) * Math.PI / 3
+      const x1 = cx + r * Math.cos(angle1)
+      const y1 = cy + r * Math.sin(angle1)
+      const x2 = cx + r * Math.cos(angle2)
+      const y2 = cy + r * Math.sin(angle2)
+      edges.push({ x1, y1, x2, y2 })
+      if (r < R) {
+        const x3 = cx + (r + 50) * Math.cos(angle1)
+        const y3 = cy + (r + 50) * Math.sin(angle1)
+        edges.push({ x1, y1, x2: x3, y2: y3 })
+      }
+    }
+  }
+  // Add some chaotic crossing lines
+  for (let i = 0; i < 12; i++) {
+    edges.push({
+      x1: cx + R * Math.cos(i * Math.PI / 6),
+      y1: cy + R * Math.sin(i * Math.PI / 6),
+      x2: cx + R * Math.cos((i + 5) * Math.PI / 6),
+      y2: cy + R * Math.sin((i + 5) * Math.PI / 6)
+    })
+  }
+  return edges
+})
+
+function submitCalibration() {
+  const code = calibrationCode.value.trim().toUpperCase()
+  if (code === 'FRACTAL-7') {
+    pushLine('> 校验通过：[FRACTAL-7]。上帝视角图层已解锁。')
+    phase.value = 'idle'
+    isFractalRevealed.value = true
+  } else if (code) {
+    pushLine('> 校验失败：无效的校验码。')
+  }
+  calibrationCode.value = ''
+}
 </script>
 
 <template>
@@ -252,12 +298,12 @@ const showPolyline = computed(() => {
         <div v-for="(line, idx) in terminalLines" :key="idx" class="term-line">{{ line }}</div>
         
         <div class="action-row" v-if="phase === 'idle'">
-          <button class="action-btn" @click="startRound">
+          <button class="action-btn" @click="startRound" v-if="!isFractalRevealed">
             开始第 {{ targetIndex + 1 }}/{{ targets.length }} 组（{{ currentPatternMode === 'hard' ? '困难' : '简单' }}）
           </button>
         </div>
         
-        <div class="action-row" v-if="phase === 'input'">
+        <div class="action-row" v-if="phase === 'input' && !isFractalRevealed">
           <button class="action-btn" @click="resetInput">重置输入</button>
         </div>
 
@@ -265,41 +311,70 @@ const showPolyline = computed(() => {
           >> 当前测绘任务已完成
           <button @click="router.push('/ue-stc/ops')" class="return-btn">返回行动页</button>
         </div>
+
+        <div class="calibration-row" v-if="!isFractalRevealed">
+          <span class="prompt">校验:</span>
+          <input 
+            v-model="calibrationCode" 
+            @keydown.enter="submitCalibration"
+            class="calib-input" 
+            type="text" 
+            placeholder="输入校验码..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
       </div>
 
       <div class="radar-container">
         <svg viewBox="0 0 100 100" class="radar-svg">
-          <!-- 背景连接线 (暗色) -->
-          <g class="bg-edges">
-            <line v-for="i in 6" :key="'outer'+i"
-                  :x1="baseNodes[i].x" :y1="baseNodes[i].y"
-                  :x2="baseNodes[i===6 ? 1 : i+1].x" :y2="baseNodes[i===6 ? 1 : i+1].y" />
-            <line v-for="i in 6" :key="'inner'+i"
-                  :x1="baseNodes[0].x" :y1="baseNodes[0].y"
-                  :x2="baseNodes[i].x" :y2="baseNodes[i].y" />
-            <line v-if="isHardGraph" x1="50" y1="50" x2="66" y2="41" />
-            <line v-if="isHardGraph" x1="50" y1="50" x2="66" y2="59" />
-            <line v-if="isHardGraph" x1="50" y1="50" x2="34" y2="41" />
-            <line v-if="isHardGraph" x1="50" y1="50" x2="34" y2="59" />
-          </g>
-          
-          <!-- 绘制的线 -->
-          <polyline 
-            :points="showPolyline" 
-            class="connect-line" 
-            :class="{ 'show-mode': phase === 'show', 'done-mode': phase === 'success' }"
-          />
+          <g class="world-group" :class="{'zoomed-out': isFractalRevealed}">
+            <!-- 隐藏普通的图案 -->
+            <template v-if="!isFractalRevealed">
+              <!-- 背景连接线 (暗色) -->
+              <g class="bg-edges">
+                <line v-for="i in 6" :key="'outer'+i"
+                      :x1="baseNodes[i].x" :y1="baseNodes[i].y"
+                      :x2="baseNodes[i===6 ? 1 : i+1].x" :y2="baseNodes[i===6 ? 1 : i+1].y" />
+                <line v-for="i in 6" :key="'inner'+i"
+                      :x1="baseNodes[0].x" :y1="baseNodes[0].y"
+                      :x2="baseNodes[i].x" :y2="baseNodes[i].y" />
+                <line v-if="isHardGraph" x1="50" y1="50" x2="66" y2="41" />
+                <line v-if="isHardGraph" x1="50" y1="50" x2="66" y2="59" />
+                <line v-if="isHardGraph" x1="50" y1="50" x2="34" y2="41" />
+                <line v-if="isHardGraph" x1="50" y1="50" x2="34" y2="59" />
+              </g>
+              
+              <!-- 绘制的线 -->
+              <polyline 
+                :points="showPolyline" 
+                class="connect-line" 
+                :class="{ 'show-mode': phase === 'show', 'done-mode': phase === 'success' }"
+              />
 
-          <!-- 节点 -->
-          <g v-for="node in activeNodes" :key="node.id"
-             @click="clickNode(node.id)" 
-             class="node-group"
-             :class="{ 
-               active: userInput.includes(node.id) || (phase==='show' && targets[targetIndex]?.includes(node.id)),
-               clickable: phase === 'input'
-             }">
-            <circle :cx="node.x" :cy="node.y" r="4" class="node-touch-area" />
-            <circle :cx="node.x" :cy="node.y" r="1.5" class="node-circle" />
+              <!-- 节点 -->
+              <g v-for="node in activeNodes" :key="node.id"
+                 @click="clickNode(node.id)" 
+                 class="node-group"
+                 :class="{ 
+                   active: userInput.includes(node.id) || (phase==='show' && targets[targetIndex]?.includes(node.id)),
+                   clickable: phase === 'input'
+                 }">
+                <circle :cx="node.x" :cy="node.y" r="4" class="node-touch-area" />
+                <circle :cx="node.x" :cy="node.y" r="1.5" class="node-circle" />
+              </g>
+            </template>
+
+            <!-- 梅塔特隆立方体 / 高维几何 -->
+            <template v-else>
+              <g class="fractal-layer">
+                <line v-for="(e, i) in fractalEdges" :key="i" :x1="e.x1" :y1="e.y1" :x2="e.x2" :y2="e.y2" />
+                <!-- 中心节点 -->
+                <circle cx="50" cy="50" r="30" class="core-node-touch" @click="router.push('/ue-stc/ending')" />
+                <circle cx="50" cy="50" r="10" class="core-node-visual" />
+                <text x="50" y="25" class="core-text" text-anchor="middle">[Project_Ascension.md]</text>
+              </g>
+            </template>
           </g>
         </svg>
       </div>
@@ -362,6 +437,36 @@ const showPolyline = computed(() => {
   font-weight: bold;
 }
 
+.calibration-row {
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 1px dashed #131;
+  padding-top: 0.5rem;
+}
+
+.prompt {
+  color: #8c8;
+  font-size: 0.85rem;
+}
+
+.calib-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #4a4;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.85rem;
+  width: 120px;
+  outline: none;
+}
+
+.calib-input:focus {
+  border-bottom-color: #0f0;
+  box-shadow: 0 1px 0 #0f0;
+}
+
 .return-btn {
   margin-left: 1rem;
   background: #131;
@@ -394,6 +499,44 @@ const showPolyline = computed(() => {
   width: 100%;
   height: 100%;
   display: block;
+}
+
+.world-group {
+  transition: transform 4s cubic-bezier(0.25, 1, 0.5, 1);
+  transform-origin: 50px 50px;
+}
+
+.world-group.zoomed-out {
+  transform: scale(0.12);
+}
+
+.fractal-layer line {
+  stroke: rgba(255, 50, 50, 0.5);
+  stroke-width: 2;
+  transition: all 1s;
+}
+
+.core-node-touch {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.core-node-visual {
+  fill: #f00;
+  animation: pulse-core 1.5s infinite alternate;
+}
+
+.core-text {
+  fill: #f00;
+  font-size: 10px;
+  font-family: inherit;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+@keyframes pulse-core {
+  from { r: 5; filter: drop-shadow(0 0 10px #f00); }
+  to { r: 12; filter: drop-shadow(0 0 30px #f00); }
 }
 
 .bg-edges line {

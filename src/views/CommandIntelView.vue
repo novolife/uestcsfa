@@ -32,7 +32,7 @@ const intelShop = [
     title: '前任日志片段',
     cost: 10,
     content:
-      '【日志片段】玩家发现实体降临并非随机，而是遵循复杂时空周期。要预测下一次出现，必须破解基于天干地支与五行生克的高维时间密码，并据此推算能量薄弱点。',
+      '【日志片段】实体降临并非随机，而是遵循复杂时空周期。要预测下一次出现，必须破解基于天干地支与五行生克的高维时间密码，并据此推算能量薄弱点。',
   },
   {
     id: 'higher-map',
@@ -43,12 +43,22 @@ const intelShop = [
   },
   {
     id: 'entity-truth',
-    title: '实体真相档案',
+    title: '实体真相线索',
     cost: 20,
     content:
-      '【真相档案】实体并非单一生物体，而是观测-反馈系统。观察者行为会改变其下一次出现方式，任务记录本身即为干预的一部分。',
+      '【逆向飞升】研究似乎在暗示“不可见实体”并非来自外星，而是未来完成高维进化的人类意识集合体。',
   },
 ]
+
+const visibleIntelShop = computed(() => {
+  const hasFirstTwo = unlockedIntelIds.value.includes('director-log') && unlockedIntelIds.value.includes('higher-map')
+  return intelShop.filter(item => {
+    if (item.id === 'entity-truth') {
+      return hasFirstTwo
+    }
+    return true
+  })
+})
 
 const unlockedIntel = computed(() => intelShop.filter((item) => unlockedIntelIds.value.includes(item.id)))
 const selectedIntel = computed(() => unlockedIntel.value.find((item) => item.id === selectedIntelId.value) || null)
@@ -154,7 +164,7 @@ function enableContainmentOnlyMode() {
         <h2 class="section-title">情报商店</h2>
         <p class="intel-desc">当前积分：{{ points }}</p>
         <div class="shop-list">
-          <div class="shop-item" v-for="item in intelShop" :key="item.id">
+          <div class="shop-item" v-for="item in visibleIntelShop" :key="item.id">
             <div>
               <p class="shop-title">{{ item.title }}</p>
               <p class="shop-cost">价格：{{ item.cost }} 积分</p>

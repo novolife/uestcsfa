@@ -74,6 +74,11 @@ function isDecipherUnlocked() {
   return unlockedIntel.includes('director-log')
 }
 
+function isTruthUnlocked() {
+  const unlockedIntel = JSON.parse(sessionStorage.getItem(UNLOCKED_INTEL_STORAGE) || '[]')
+  return unlockedIntel.includes('entity-truth')
+}
+
 const TASK_POOLS = {
   patrol: [
     { type: '巡逻任务', theater: '西南战区', location: '成都·清水河', points: 1 },
@@ -158,6 +163,21 @@ function refillAvailableTasks() {
   if (decipher && decipherCount === 0 && !claimedTypes.includes('时空共鸣预测')) {
     const toAdd = getRandomFromPool(TASK_POOLS.decipher, 1)
     toAdd.forEach(t => availableTasks.value.push({ id: nextTaskId('d'), status: '待领取', ...t }))
+  }
+
+  const truth = isTruthUnlocked()
+  const specialCount = currentTypes.filter(t => t === '【极秘指令】零号基站物资调配').length
+  const claimedSpecial = claimedTypes.includes('【极秘指令】零号基站物资调配')
+
+  if (truth && specialCount === 0 && !claimedSpecial) {
+    availableTasks.value.unshift({ 
+      id: 's-000', 
+      type: '【极秘指令】零号基站物资调配', 
+      theater: '核心系统', 
+      location: '零号基站', 
+      status: '待领取', 
+      points: 0 
+    })
   }
 }
 
@@ -310,6 +330,13 @@ function executeTask(task) {
     )
     router.push('/ue-stc/decipher')
   }
+  if (task.type === '【极秘指令】零号基站物资调配') {
+    task.status = '进行中'
+    persistTasks()
+    latestLog.value = '系统提示：请前往终端输入特殊调度代码 DMP-X-000。'
+    router.push('/ue-stc/logistics')
+    return
+  }
 }
 
 function taskActionText(task) {
@@ -319,6 +346,7 @@ function taskActionText(task) {
   }
   if (task.type === '模因污染清洗任务') return '进入清洗模块'
   if (task.type === '时空共鸣预测') return '进入推演终端'
+  if (task.type === '【极秘指令】零号基站物资调配') return '进入物资终端'
   return '进入玩法'
 }
 

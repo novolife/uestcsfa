@@ -86,6 +86,12 @@ const router = createRouter({
       meta: { command: true, requiresAuth: true },
     },
     {
+      path: '/ue-stc/ending',
+      name: 'command-ending',
+      component: () => import('../views/CommandEndingView.vue'),
+      meta: { command: true, requiresAuth: true },
+    },
+    {
       path: '/ue-stc/about',
       name: 'command-about',
       component: () => import('../views/CommandAboutView.vue'),
