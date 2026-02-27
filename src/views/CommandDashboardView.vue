@@ -1,12 +1,15 @@
 <script setup>
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { RouterLink } from 'vue-router'
+import { onMounted, onUnmounted, ref } from 'vue'
+import { useRouter, RouterLink } from 'vue-router'
 import CommandHeader from '@/components/CommandHeader.vue'
 
 const router = useRouter()
 const AUTH_STORAGE = 'ue-stc-auth'
+const AVAILABLE_TASKS_STORAGE = 'ue-stc-available-tasks'
+const CLAIMED_TASKS_STORAGE = 'ue-stc-claimed-tasks'
 
+let clockTimer = null
+let actionTimer = null
 onMounted(() => {
   if (!sessionStorage.getItem(AUTH_STORAGE)) {
     router.replace('/ue-stc')
@@ -20,20 +23,36 @@ function logout() {
 
 const status = ref('NOMINAL')
 const time = ref('--:--:--')
+const actionPreview = ref([])
+const actionStats = ref({ available: 0, claimed: 0, inProgress: 0 })
+
 function tick() {
   const d = new Date()
   time.value = d.toTimeString().slice(0, 8)
 }
+
+function readActionData() {
+  const available = JSON.parse(sessionStorage.getItem(AVAILABLE_TASKS_STORAGE) || '[]')
+  const claimed = JSON.parse(sessionStorage.getItem(CLAIMED_TASKS_STORAGE) || '[]')
+  actionStats.value = {
+    available: available.length,
+    claimed: claimed.length,
+    inProgress: claimed.filter((t) => t.status === '进行中').length,
+  }
+  actionPreview.value = [...available.slice(0, 2), ...claimed.filter((t) => t.status !== '已完成').slice(0, 2)]
+}
+
 onMounted(() => {
   tick()
-  const id = setInterval(tick, 1000)
-  return () => clearInterval(id)
+  readActionData()
+  clockTimer = setInterval(tick, 1000)
+  actionTimer = setInterval(readActionData, 3000)
 })
 
-const priorityActions = [
-  { location: '成都·清水河', level: '高', brief: '校园节点例行巡检' },
-  { location: '成都·沙河', level: '高', brief: '与《科幻世界》杂志社联络通道维持' },
-]
+onUnmounted(() => {
+  if (clockTimer) clearInterval(clockTimer)
+  if (actionTimer) clearInterval(actionTimer)
+})
 
 // 各战区巡逻覆盖率（首页简图，详情见情报页）
 const coverageByTheater = [
@@ -61,12 +80,16 @@ const coverageByTheater = [
         <p class="status-line">实体监视: 待命</p>
       </section>
       <section class="dash-section priority">
-        <h2>当前行动</h2>
+        <h2>行动栏</h2>
+        <p class="status-line">待领取: {{ actionStats.available }} ｜ 已领取: {{ actionStats.claimed }} ｜ 进行中: {{ actionStats.inProgress }}</p>
         <div class="priority-list">
-          <div v-for="(a, i) in priorityActions" :key="i" class="priority-item">
+          <div v-for="a in actionPreview" :key="a.id" class="priority-item">
             <span class="priority-location">{{ a.location }}</span>
-            <span class="priority-level">{{ a.level }}</span>
-            <span class="priority-brief">{{ a.brief }}</span>
+            <span class="priority-level">{{ a.type }}</span>
+            <span class="priority-brief">{{ a.status }}</span>
+          </div>
+          <div v-if="actionPreview.length === 0" class="priority-item">
+            <span class="priority-brief">暂无任务数据，前往行动页初始化。</span>
           </div>
         </div>
         <RouterLink to="/ue-stc/ops" class="link-more">前往行动页</RouterLink>

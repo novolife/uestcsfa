@@ -56,6 +56,36 @@ const router = createRouter({
       meta: { command: true, requiresAuth: true },
     },
     {
+      path: '/ue-stc/map',
+      name: 'command-map',
+      component: () => import('../views/CommandMapView.vue'),
+      meta: { command: true, requiresAuth: true },
+    },
+    {
+      path: '/ue-stc/logistics',
+      name: 'command-logistics',
+      component: () => import('../views/CommandLogisticsView.vue'),
+      meta: { command: true, requiresAuth: true },
+    },
+    {
+      path: '/ue-stc/comms',
+      name: 'command-comms',
+      component: () => import('../views/CommandCommsView.vue'),
+      meta: { command: true, requiresAuth: true },
+    },
+    {
+      path: '/ue-stc/decipher',
+      name: 'command-decipher',
+      component: () => import('../views/CommandDecipherView.vue'),
+      meta: { command: true, requiresAuth: true },
+    },
+    {
+      path: '/ue-stc/memetic',
+      name: 'command-memetic',
+      component: () => import('../views/CommandMemeticView.vue'),
+      meta: { command: true, requiresAuth: true },
+    },
+    {
       path: '/ue-stc/about',
       name: 'command-about',
       component: () => import('../views/CommandAboutView.vue'),
@@ -76,11 +106,14 @@ const router = createRouter({
 })
 
 router.beforeEach((to, _from, next) => {
-  if (to.meta.requiresAuth && !sessionStorage.getItem(AUTH_STORAGE)) {
-    next({ path: '/ue-stc' })
-  } else {
-    next()
+  // 如果是指挥部页面，并且不是登录页本身
+  if (to.meta.command && to.name !== 'command-login') {
+    if (!sessionStorage.getItem(AUTH_STORAGE)) {
+      next({ path: '/ue-stc' })
+      return
+    }
   }
+  next()
 })
 
 export default router
