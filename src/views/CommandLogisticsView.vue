@@ -21,6 +21,7 @@ const inventory = ref([])
 const points = ref(0)
 const inputRef = ref(null)
 const emergency = ref(null)
+const showSuccessAction = ref(false)
 
 const catalog = [
   { name: '三型阻尼器', sku: 'DMP-III-884' },
@@ -125,6 +126,7 @@ function submitCode() {
       sessionStorage.setItem(INVENTORY_STORAGE, JSON.stringify(inventory.value))
       emergency.value = approveEmergencyDispatch()
       outputLines.value.push(`紧急审批通过: [${code}] 已出库，等待通信终端交付。`)
+      showSuccessAction.value = true
       scrollToBottom()
       return
     }
@@ -138,6 +140,7 @@ function submitCode() {
     inventory.value.push(code)
     sessionStorage.setItem(INVENTORY_STORAGE, JSON.stringify(inventory.value))
     outputLines.value.push(`兑换成功: [${code}] 已加入库存`)
+    showSuccessAction.value = true
   } else {
     outputLines.value.push(`未找到代码为 [${code}] 的物资记录。`)
   }
@@ -187,8 +190,8 @@ function scrollToBottom() {
             />
           </div>
           
-          <div class="success-action">
-            <button @click="router.push('/ue-stc/ops')" class="return-btn">返回行动页交付物资</button>
+          <div class="success-action" v-if="showSuccessAction">
+            <button @click="router.push('/ue-stc/comms')" class="return-btn">前往通信终端</button>
           </div>
         </div>
       </div>

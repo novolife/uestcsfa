@@ -350,21 +350,6 @@ function taskActionText(task) {
   return '进入玩法'
 }
 
-function devAddPoints() {
-  if (questState.value === 0) {
-    questState.value = 1
-    sessionStorage.setItem(QUEST_STORAGE, '1')
-    availableTasks.value = []
-    claimedTasks.value = claimedTasks.value.filter((t) => t.id !== 'trainee-001')
-    refillAvailableTasks()
-    persistTasks()
-  }
-  points.value += 10
-  sessionStorage.setItem(POINTS_STORAGE, String(points.value))
-  emergency.value = checkEmergencyTimeout() || maybeTriggerEmergency(points.value) || readEmergency()
-  latestLog.value = `[DEV] 测试：当前积分 ${points.value}`
-}
-
 onMounted(() => {
   if (!sessionStorage.getItem(AUTH_STORAGE)) {
     router.replace('/ue-stc')
@@ -460,12 +445,6 @@ onMounted(() => {
     </CommandHeader>
     <main class="ops-main">
       <h1 class="ops-title">行动中心</h1>
-
-      <div class="dev-panel">
-        <button class="btn-action-special dev-btn" type="button" @click="devAddPoints">
-          [测试开关] 快速转正 & 获得 10 积分
-        </button>
-      </div>
 
       <p class="ops-desc" v-if="!isFormal">见习调度员：仅开放考核任务。</p>
       <p class="ops-desc" v-else>当前积分：{{ points }} / 层级：L{{ level }}</p>
@@ -592,20 +571,6 @@ onMounted(() => {
   font-size: 0.8rem;
   color: #555;
   margin-bottom: 1.5rem;
-}
-
-.dev-panel {
-  margin-bottom: 1rem;
-}
-
-.dev-btn {
-  border-color: #a44;
-  color: #f66;
-}
-
-.dev-btn:hover {
-  background: #a44;
-  color: #fff;
 }
 
 .ops-section {
