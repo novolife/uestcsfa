@@ -14,7 +14,6 @@ const outputLines = ref([
   'LOGISTICS TERMINAL v1.2.4',
   '=========================',
   '欢迎使用物资调配系统（兑换后进入库存）。',
-  '可兑换代码: EMP-01 / KEY-99 / MED-77',
   '',
   '请输入物资代码进行兑换:'
 ])
@@ -40,7 +39,7 @@ onMounted(() => {
   inventory.value = JSON.parse(sessionStorage.getItem(INVENTORY_STORAGE) || '[]')
   points.value = parseInt(sessionStorage.getItem(POINTS_STORAGE) || '0', 10)
   emergency.value = checkEmergencyTimeout() || readEmergency()
-  outputLines.value.push(`当前积分: ${points.value} / 当前库存: ${inventory.value.join(' / ') || '空'}`)
+  outputLines.value.push(`当前积分: ${points.value}`)
   if (emergency.value?.status === 'active') {
     outputLines.value.push(`!!! 紧急审批中：${emergency.value.itemName} / SKU ${emergency.value.sku}`)
   }
@@ -75,7 +74,6 @@ function submitCode() {
     inventory.value.push(code)
     sessionStorage.setItem(INVENTORY_STORAGE, JSON.stringify(inventory.value))
     outputLines.value.push(`兑换成功: [${code}] 已加入库存`)
-    outputLines.value.push(`库存更新: ${inventory.value.join(' / ')}`)
   } else {
     outputLines.value.push(`未找到代码为 [${code}] 的物资记录。`)
   }

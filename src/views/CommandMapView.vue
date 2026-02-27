@@ -9,7 +9,7 @@ const POINTS_STORAGE = 'ue-stc-points'
 const MAP_MISSION_STORAGE = 'ue-stc-map-mission'
 const MAP_DONE_TASK_STORAGE = 'ue-stc-map-done-task'
 
-const nodes = [
+const baseNodes = [
   { id: 0, x: 50, y: 50 },
   { id: 1, x: 50, y: 14 },
   { id: 2, x: 82, y: 32 },
@@ -19,43 +19,118 @@ const nodes = [
   { id: 6, x: 18, y: 32 },
 ]
 
-const mission = ref({ mode: 'trainee', patternCount: 1, rewardPoints: 0 })
-const phase = ref('idle') // idle/show/input/success
+const hardExtraNodes = [
+  { id: 7, x: 66, y: 41 },
+  { id: 8, x: 66, y: 59 },
+  { id: 9, x: 34, y: 41 },
+  { id: 10, x: 34, y: 59 },
+]
+
+const basicEdges = [
+  [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 1],
+  [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6]
+]
+
+const hardEdges = [
+  [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 1],
+  [0, 1], [0, 4],
+  [0, 7], [7, 2],
+  [0, 8], [8, 3],
+  [0, 9], [9, 6],
+  [0, 10], [10, 5],
+  [1, 7], [7, 8], [8, 4], [4, 10], [10, 9], [9, 1]
+]
+
+const mission = ref({ mode: 'trainee', patternCount: 1, patternPlan: ['simple'], rewardPoints: 0 })
+const phase = ref('idle')
 const targetIndex = ref(0)
 const userInput = ref([])
 const targets = ref([])
+const targetModes = ref([])
 const terminalLines = ref(['> 测绘终端已连接。'])
+
+const currentPatternMode = computed(() => targetModes.value[targetIndex.value] || 'simple')
+const isHardGraph = computed(() => currentPatternMode.value === 'hard')
+const activeNodes = computed(() => (isHardGraph.value ? [...baseNodes, ...hardExtraNodes] : baseNodes))
+
+const activeBgEdges = computed(() => {
+  const edges = isHardGraph.value ? hardEdges : basicEdges
+  return edges.map(([u, v]) => {
+    const p1 = activeNodes.value.find((n) => n.id === u)
+    const p2 = activeNodes.value.find((n) => n.id === v)
+    return { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y }
+  })
+})
 
 function pushLine(msg) {
   terminalLines.value.push(msg)
 }
 
+function getEdgeStr(a, b) {
+  return Math.min(a, b) + '-' + Math.max(a, b)
+}
+
 function getEdges(seq) {
   const edges = []
   for (let i = 0; i < seq.length - 1; i++) {
-    const a = seq[i]
-    const b = seq[i + 1]
-    const edge = Math.min(a, b) + '-' + Math.max(a, b)
-    if (!edges.includes(edge)) edges.push(edge)
+    edges.push(getEdgeStr(seq[i], seq[i + 1]))
   }
-  return edges
+  return Array.from(new Set(edges))
 }
 
-function randomSequence(length) {
-  const seq = [Math.floor(Math.random() * 7)]
-  while (seq.length < length) {
-    const next = Math.floor(Math.random() * 7)
-    if (next !== seq[seq.length - 1]) seq.push(next)
+function buildAdjacency(edges) {
+  const adj = new Map()
+  for (const [u, v] of edges) {
+    if (!adj.has(u)) adj.set(u, [])
+    if (!adj.has(v)) adj.set(v, [])
+    adj.get(u).push(v)
+    adj.get(v).push(u)
   }
-  return seq
+  return adj
+}
+
+function generateValidPath(length, isHard) {
+  const edges = isHard ? hardEdges : basicEdges
+  const adj = buildAdjacency(edges)
+  const nodeIds = Array.from(adj.keys())
+
+  for (let attempt = 0; attempt < 500; attempt++) {
+    const startNode = nodeIds[Math.floor(Math.random() * nodeIds.length)]
+    const path = [startNode]
+    const usedEdges = new Set()
+
+    let current = startNode
+    let stuck = false
+    while (path.length < length) {
+      const neighbors = adj.get(current) || []
+      const validNeighbors = neighbors.filter((n) => !usedEdges.has(getEdgeStr(current, n)))
+
+      if (validNeighbors.length === 0) {
+        stuck = true
+        break
+      }
+
+      const next = validNeighbors[Math.floor(Math.random() * validNeighbors.length)]
+      usedEdges.add(getEdgeStr(current, next))
+      path.push(next)
+      current = next
+    }
+    if (!stuck) return path
+  }
+  return [0, 1, 2, 3, 4].slice(0, length)
 }
 
 function buildTargets() {
+  const plan = Array.isArray(mission.value.patternPlan) && mission.value.patternPlan.length > 0
+    ? mission.value.patternPlan
+    : Array(mission.value.patternCount || 1).fill(mission.value.mode === 'containment' ? 'hard' : 'simple')
+  targetModes.value = plan
+
   const list = []
-  for (let i = 0; i < mission.value.patternCount; i++) {
-    const isHard = mission.value.mode === 'containment'
-    const len = isHard ? 6 + Math.floor(Math.random() * 2) : 5
-    list.push(randomSequence(len))
+  for (let i = 0; i < plan.length; i++) {
+    const isHard = plan[i] === 'hard'
+    const len = isHard ? 6 + Math.floor(Math.random() * 3) : 5 + Math.floor(Math.random() * 2)
+    list.push(generateValidPath(len, isHard))
   }
   targets.value = list
 }
@@ -66,14 +141,19 @@ onMounted(() => {
     mission.value = JSON.parse(saved)
   }
   buildTargets()
-  pushLine(`> 当前任务模式：${mission.value.mode}，图形数：${mission.value.patternCount}`)
+  pushLine(`> 当前任务模式：${mission.value.mode}，图形数：${targets.value.length}`)
+  const hardCount = targetModes.value.filter((m) => m === 'hard').length
+  if (hardCount > 0) {
+    pushLine(`> 本次包含困难测绘 ${hardCount} 组（扩展顶点已启用）。`)
+  }
   pushLine('> 规则：图形显示 3 秒后消失，请复原。')
 })
 
 function startRound() {
   phase.value = 'show'
   userInput.value = []
-  pushLine(`> 正在显示第 ${targetIndex.value + 1}/${targets.value.length} 组图形...`)
+  const label = currentPatternMode.value === 'hard' ? '困难测绘' : '简单测绘'
+  pushLine(`> 正在显示第 ${targetIndex.value + 1}/${targets.value.length} 组（${label}）...`)
   setTimeout(() => {
     phase.value = 'input'
     pushLine('> 图形已隐藏，请开始复原。')
@@ -82,28 +162,45 @@ function startRound() {
 
 function clickNode(nodeId) {
   if (phase.value !== 'input') return
-  if (userInput.value.length > 0 && userInput.value[userInput.value.length - 1] === nodeId) return
+
+  const len = userInput.value.length
+  if (len > 0 && userInput.value[len - 1] === nodeId) return
+
+  if (len > 0) {
+    const lastNode = userInput.value[len - 1]
+    const edgeKey = getEdgeStr(lastNode, nodeId)
+    const validEdges = isHardGraph.value ? hardEdges : basicEdges
+    const isValidAdjacency = validEdges.some((e) => getEdgeStr(e[0], e[1]) === edgeKey)
+    if (!isValidAdjacency) return 
+
+    const currentEdges = getEdges(userInput.value)
+    if (currentEdges.includes(edgeKey)) return 
+  }
+
   userInput.value.push(nodeId)
 
-  const targetEdges = getEdges(targets.value[targetIndex.value])
-  const inputEdges = getEdges(userInput.value)
-  if (inputEdges.length !== targetEdges.length) return
+  if (userInput.value.length === 1) return
 
-  const ok = inputEdges.every((e) => targetEdges.includes(e))
-  if (!ok) {
-    pushLine('> 图形不匹配，当前轮次失败。')
+  const targetEdgeSet = new Set(getEdges(targets.value[targetIndex.value]))
+  const inputEdges = getEdges(userInput.value)
+
+  const lastEdge = inputEdges[inputEdges.length - 1]
+  if (!targetEdgeSet.has(lastEdge)) {
+    pushLine('> 错误：检测到偏离目标轨迹的连接。当前轮次崩溃。')
     phase.value = 'idle'
     userInput.value = []
     return
   }
 
-  pushLine(`> 第 ${targetIndex.value + 1} 组复原成功。`)
-  targetIndex.value += 1
-  if (targetIndex.value >= targets.value.length) {
-    finishMission()
-    return
+  if (inputEdges.length === targetEdgeSet.size) {
+    pushLine(`> 第 ${targetIndex.value + 1} 组复原成功。`)
+    targetIndex.value += 1
+    if (targetIndex.value >= targets.value.length) {
+      finishMission()
+    } else {
+      phase.value = 'idle'
+    }
   }
-  phase.value = 'idle'
 }
 
 function finishMission() {
@@ -130,7 +227,7 @@ function resetInput() {
 function generatePolyline(seq) {
   if (!seq || seq.length === 0) return ''
   return seq.map((id) => {
-    const n = nodes.find((x) => x.id === id)
+    const n = activeNodes.value.find((x) => x.id === id)
     return `${n.x},${n.y}`
   }).join(' ')
 }
@@ -156,7 +253,7 @@ const showPolyline = computed(() => {
         
         <div class="action-row" v-if="phase === 'idle'">
           <button class="action-btn" @click="startRound">
-            开始第 {{ targetIndex + 1 }}/{{ targets.length }} 组
+            开始第 {{ targetIndex + 1 }}/{{ targets.length }} 组（{{ currentPatternMode === 'hard' ? '困难' : '简单' }}）
           </button>
         </div>
         
@@ -175,11 +272,15 @@ const showPolyline = computed(() => {
           <!-- 背景连接线 (暗色) -->
           <g class="bg-edges">
             <line v-for="i in 6" :key="'outer'+i"
-                  :x1="nodes[i].x" :y1="nodes[i].y"
-                  :x2="nodes[i===6 ? 1 : i+1].x" :y2="nodes[i===6 ? 1 : i+1].y" />
+                  :x1="baseNodes[i].x" :y1="baseNodes[i].y"
+                  :x2="baseNodes[i===6 ? 1 : i+1].x" :y2="baseNodes[i===6 ? 1 : i+1].y" />
             <line v-for="i in 6" :key="'inner'+i"
-                  :x1="nodes[0].x" :y1="nodes[0].y"
-                  :x2="nodes[i].x" :y2="nodes[i].y" />
+                  :x1="baseNodes[0].x" :y1="baseNodes[0].y"
+                  :x2="baseNodes[i].x" :y2="baseNodes[i].y" />
+            <line v-if="isHardGraph" x1="50" y1="50" x2="66" y2="41" />
+            <line v-if="isHardGraph" x1="50" y1="50" x2="66" y2="59" />
+            <line v-if="isHardGraph" x1="50" y1="50" x2="34" y2="41" />
+            <line v-if="isHardGraph" x1="50" y1="50" x2="34" y2="59" />
           </g>
           
           <!-- 绘制的线 -->
@@ -190,7 +291,7 @@ const showPolyline = computed(() => {
           />
 
           <!-- 节点 -->
-          <g v-for="node in nodes" :key="node.id" 
+          <g v-for="node in activeNodes" :key="node.id"
              @click="clickNode(node.id)" 
              class="node-group"
              :class="{ 

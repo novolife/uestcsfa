@@ -13,6 +13,8 @@ const AID_REQUESTS_STORAGE = 'ue-stc-aid-requests'
 const MEMETIC_CLEANED_STORAGE = 'ue-stc-memetic-cleaned'
 const MAP_MISSION_STORAGE = 'ue-stc-map-mission'
 const MAP_DONE_TASK_STORAGE = 'ue-stc-map-done-task'
+const DECIPHER_MISSION_STORAGE = 'ue-stc-decipher-mission'
+const DECIPHER_DONE_TASK_STORAGE = 'ue-stc-decipher-done-task'
 const AVAILABLE_TASKS_STORAGE = 'ue-stc-available-tasks'
 const CLAIMED_TASKS_STORAGE = 'ue-stc-claimed-tasks'
 const TASK_COUNTER_STORAGE = 'ue-stc-task-counter'
@@ -39,21 +41,35 @@ const level = computed(() => {
   if (points.value >= 5) return 2
   return 1
 })
-const openDirectories = computed(() => {
-  const dirs = ['行动档案', '基础战区图层']
-  if (level.value >= 2) dirs.push('前任局长日志（片段）')
-  if (level.value >= 3) dirs.push('高维地图图层 / 实体真相档')
-  return dirs
+
+const SKU_NAME_MAP = {
+  'EMP-01': '战术 EMP 模组',
+  'MED-77': '应急医疗包',
+  'KEY-99': '解密密钥组',
+  'DMP-III-884': '三型阻尼器',
+  'PAB-44X-12': '偏振锚栓',
+  'LPC-9A-770': '局域相位笼',
+}
+
+const inventoryDisplay = computed(() => {
+  if (!inventory.value.length) return []
+  const bucket = {}
+  inventory.value.forEach((sku) => {
+    const name = SKU_NAME_MAP[sku] || '未识别物资'
+    if (!bucket[name]) bucket[name] = 0
+    bucket[name] += 1
+  })
+  return Object.entries(bucket).map(([name, count]) => ({ name, count }))
 })
 
 function seedFormalTasks() {
   return [
     { id: 'p-101', type: '巡逻任务', theater: '西南战区', location: '成都·清水河', status: '待领取', points: 1 },
-    { id: 'p-102', type: '巡逻任务', theater: '华北战区', location: '天津', status: '待领取', points: 1 },
-    { id: 'p-103', type: '巡逻任务', theater: '华东战区', location: '上海', status: '待领取', points: 1 },
-    { id: 'p-104', type: '巡逻任务', theater: '华南战区', location: '深圳', status: '待领取', points: 1 },
+    { id: 'p-102', type: '巡逻任务', theater: '华北战区', location: '天津', status: '待领取', points: 2 },
+    { id: 'p-103', type: '巡逻任务', theater: '华东战区', location: '上海', status: '待领取', points: 3 },
+    { id: 'p-104', type: '巡逻任务', theater: '华南战区', location: '深圳', status: '待领取', points: 2 },
     { id: 'c-201', type: '收容任务', theater: '西南战区', location: '成都·沙河', status: '待领取', points: 2 },
-    { id: 'c-202', type: '收容任务', theater: '核心战区', location: '未定裂隙', status: '待领取', points: 3 },
+    { id: 'c-202', type: '收容任务', theater: '核心战区', location: '未定裂隙', status: '待领取', points: 5 },
     { id: 'a-301', type: '援助任务', theater: '外勤支援', location: '04号观察点', status: '待领取', points: 3 },
     { id: 'm-401', type: '模因污染清洗任务', theater: '信息战区', location: '协会官网文章系统', status: '待领取', points: 5 },
   ]
@@ -81,7 +97,9 @@ function generateDynamicTask() {
       { theater: '西南战区', location: '绵阳' },
     ]
     const p = randomFrom(patrolPool)
-    return { id: nextTaskId('p'), type: '巡逻任务', theater: p.theater, location: p.location, status: '待领取', points: 1 }
+    const pointRoll = Math.random()
+    const patrolPoints = pointRoll < 0.55 ? 1 : pointRoll < 0.85 ? 2 : 3
+    return { id: nextTaskId('p'), type: '巡逻任务', theater: p.theater, location: p.location, status: '待领取', points: patrolPoints }
   }
   if (roll < 0.8) {
     const containmentPool = [
@@ -90,7 +108,9 @@ function generateDynamicTask() {
       { theater: '华东战区', location: '海上节点', points: 2 },
     ]
     const c = randomFrom(containmentPool)
-    return { id: nextTaskId('c'), type: '收容任务', theater: c.theater, location: c.location, status: '待领取', points: c.points }
+    const pointRoll = Math.random()
+    const containmentPoints = pointRoll < 0.4 ? 2 : pointRoll < 0.7 ? 3 : pointRoll < 0.9 ? 4 : 5
+    return { id: nextTaskId('c'), type: '收容任务', theater: c.theater, location: c.location, status: '待领取', points: containmentPoints }
   }
   if (roll < 0.92) {
     return { id: nextTaskId('a'), type: '援助任务', theater: '外勤支援', location: '联合观察点', status: '待领取', points: 3 }
@@ -132,7 +152,21 @@ function claimTask(taskId) {
   persistTasks()
 }
 
-function launchMapTask(task, mode, patternCount) {
+function buildContainmentPatternPlan(totalPoints) {
+  const plans = []
+  for (let hard = 1; hard <= Math.floor(totalPoints / 2); hard++) {
+    const simple = totalPoints - hard * 2
+    if (simple < 0) continue
+    const plan = []
+    for (let i = 0; i < simple; i++) plan.push('simple')
+    for (let i = 0; i < hard; i++) plan.push('hard')
+    plans.push(plan)
+  }
+  if (plans.length === 0) return ['hard']
+  return randomFrom(plans).sort(() => Math.random() - 0.5)
+}
+
+function launchMapTask(task, mode, patternCount, patternPlan = []) {
   task.status = '进行中'
   persistTasks()
   sessionStorage.setItem(
@@ -140,6 +174,7 @@ function launchMapTask(task, mode, patternCount) {
     JSON.stringify({
       mode,
       patternCount,
+      patternPlan,
       rewardPoints: task.points,
       taskId: task.id,
     }),
@@ -151,31 +186,23 @@ function executeTask(task) {
   if (task.status === '已完成') return
 
   if (task.id === 'trainee-001') {
-    launchMapTask(task, 'trainee', 1)
+    launchMapTask(task, 'trainee', 1, ['simple'])
     return
   }
 
   if (task.type === '巡逻任务') {
-    if (Math.random() < 0.35) {
-      latestLog.value = '巡逻触发空间扰动，转入测绘事件。'
-      launchMapTask(task, 'patrol', 1)
-      return
-    }
-    task.status = '已完成'
-    points.value += task.points
-    sessionStorage.setItem(POINTS_STORAGE, String(points.value))
-    latestLog.value = `巡逻任务完成：+${task.points} 分`
-    emergency.value = maybeTriggerEmergency(points.value)
-    if (emergency.value?.status === 'active') latestLog.value = '紧急通信触发：请立即进入通信终端。'
-    refillAvailableTasks()
-    persistTasks()
+    const patternCount = Math.max(1, Math.min(3, task.points))
+    latestLog.value = `巡逻任务启动：${patternCount} 组简单测绘。`
+    launchMapTask(task, 'patrol', patternCount, Array(patternCount).fill('simple'))
     return
   }
 
   if (task.type === '收容任务') {
-    const patternCount = task.points >= 3 ? 4 : 2
-    latestLog.value = `收容任务启动：${patternCount} 组图形测绘。`
-    launchMapTask(task, 'containment', patternCount)
+    const patternPlan = buildContainmentPatternPlan(task.points)
+    const simpleCount = patternPlan.filter((x) => x === 'simple').length
+    const hardCount = patternPlan.filter((x) => x === 'hard').length
+    latestLog.value = `收容任务启动：简单 ${simpleCount} 组 + 困难 ${hardCount} 组。`
+    launchMapTask(task, 'containment', patternPlan.length, patternPlan)
     return
   }
 
@@ -201,6 +228,20 @@ function executeTask(task) {
 
   if (task.type === '模因污染清洗任务') {
     router.push('/ue-stc/memetic')
+    return
+  }
+
+  if (task.type === '时空共鸣预测') {
+    task.status = '进行中'
+    persistTasks()
+    sessionStorage.setItem(
+      DECIPHER_MISSION_STORAGE,
+      JSON.stringify({
+        taskId: task.id,
+        rewardPoints: task.points,
+      }),
+    )
+    router.push('/ue-stc/decipher')
   }
 }
 
@@ -210,11 +251,23 @@ function taskActionText(task) {
     return canSubmitAid.value ? '交付物资' : '进入物资终端'
   }
   if (task.type === '模因污染清洗任务') return '进入清洗模块'
+  if (task.type === '时空共鸣预测') return '进入推演终端'
   return '进入玩法'
 }
 
-function openDecipher() {
-  router.push('/ue-stc/decipher')
+function devAddPoints() {
+  if (questState.value === 0) {
+    questState.value = 1
+    sessionStorage.setItem(QUEST_STORAGE, '1')
+    availableTasks.value = seedFormalTasks()
+    claimedTasks.value = claimedTasks.value.filter((t) => t.id !== 'trainee-001')
+    refillAvailableTasks()
+    persistTasks()
+  }
+  points.value += 10
+  sessionStorage.setItem(POINTS_STORAGE, String(points.value))
+  emergency.value = checkEmergencyTimeout() || maybeTriggerEmergency(points.value) || readEmergency()
+  latestLog.value = `[DEV] 测试：当前积分 ${points.value}`
 }
 
 onMounted(() => {
@@ -272,6 +325,15 @@ onMounted(() => {
     sessionStorage.removeItem(MAP_DONE_TASK_STORAGE)
   }
 
+  const decipherDoneTaskId = sessionStorage.getItem(DECIPHER_DONE_TASK_STORAGE)
+  if (decipherDoneTaskId) {
+    markClaimedTaskDone(decipherDoneTaskId, '时空共鸣预测完成，已锁定下一次实体降临坐标。')
+    refillAvailableTasks()
+    persistTasks()
+    sessionStorage.removeItem(DECIPHER_DONE_TASK_STORAGE)
+    sessionStorage.removeItem(DECIPHER_MISSION_STORAGE)
+  }
+
   if (memeticCleaned.value) {
     const memeticTask = claimedTasks.value.find((t) => t.type === '模因污染清洗任务' && t.status !== '已完成')
     if (memeticTask) {
@@ -296,22 +358,38 @@ onMounted(() => {
     <main class="ops-main">
       <h1 class="ops-title">行动中心</h1>
 
+      <div class="dev-panel">
+        <button class="btn-action-special dev-btn" type="button" @click="devAddPoints">
+          [测试开关] 快速转正 & 获得 10 积分
+        </button>
+      </div>
+
       <p class="ops-desc" v-if="!isFormal">见习调度员：仅开放考核任务。</p>
       <p class="ops-desc" v-else>当前积分：{{ points }} / 层级：L{{ level }}</p>
 
       <section class="ops-section top-panels" v-if="isFormal">
         <div class="panel">
-          <h2 class="ops-section-title">通讯频道</h2>
+          <h2 class="ops-section-title">行动日志</h2>
           <p class="panel-line">最新日志：{{ latestLog }}</p>
-          <p class="panel-line" v-if="activeAidRequest">支援请求：{{ activeAidRequest.from }} 需要 {{ activeAidRequest.code }}</p>
-          <p class="panel-line" v-else>当前无待处理请求。</p>
+          <p class="panel-line" v-if="emergency && emergency.status === 'active' && activeAidRequest">
+            紧急请求：{{ activeAidRequest.from }} 需要 {{ activeAidRequest.code }}
+          </p>
+          <p class="panel-line" v-else>当前无待处理紧急通信请求。</p>
           <p class="panel-line" v-if="emergency && emergency.status === 'active'">紧急通信：{{ emergency.agentStatus }}（需立即调拨）</p>
-          <button class="btn-claim" type="button" @click="router.push('/ue-stc/comms')">进入通信终端</button>
         </div>
         <div class="panel">
           <h2 class="ops-section-title">物资调配终端</h2>
-          <p class="panel-line">库存编码：{{ inventory.length > 0 ? inventory.join(' / ') : '无' }}</p>
           <button class="btn-claim" type="button" @click="router.push('/ue-stc/logistics')">进入终端</button>
+        </div>
+        <div class="panel">
+          <h2 class="ops-section-title">库存物资</h2>
+          <p v-if="inventoryDisplay.length === 0" class="panel-line">暂无已兑换物资。</p>
+          <ul v-else class="inventory-list">
+            <li v-for="item in inventoryDisplay" :key="item.name" class="inventory-item">
+              <span>{{ item.name }}</span>
+              <span>x{{ item.count }}</span>
+            </li>
+          </ul>
         </div>
       </section>
 
@@ -383,15 +461,6 @@ onMounted(() => {
         </div>
       </section>
 
-      <section class="ops-section" v-if="isFormal">
-        <h2 class="ops-section-title">解锁目录</h2>
-        <ul class="dir-list">
-          <li v-for="dir in openDirectories" :key="dir">{{ dir }}</li>
-        </ul>
-        <button v-if="points >= 10" class="btn-action-special" type="button" @click="openDecipher">
-          接受高优先级任务：时空频率破译
-        </button>
-      </section>
     </main>
   </div>
 </template>
@@ -420,6 +489,20 @@ onMounted(() => {
   font-size: 0.8rem;
   color: #555;
   margin-bottom: 1.5rem;
+}
+
+.dev-panel {
+  margin-bottom: 1rem;
+}
+
+.dev-btn {
+  border-color: #a44;
+  color: #f66;
+}
+
+.dev-btn:hover {
+  background: #a44;
+  color: #fff;
 }
 
 .ops-section {
@@ -509,11 +592,24 @@ onMounted(() => {
   color: #727272;
 }
 
-.dir-list {
-  margin: 0 0 1rem;
-  padding-left: 1rem;
-  color: #7a7a7a;
+.inventory-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.inventory-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-size: 0.82rem;
+  color: #7a7a7a;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.inventory-item:last-child {
+  border-bottom: 0;
 }
 
 .empty {

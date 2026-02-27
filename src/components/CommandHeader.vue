@@ -1,6 +1,7 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
+import { checkEmergencyTimeout, readEmergency } from '@/utils/emergencyComm'
 
 defineProps({
   logo: { type: String, default: 'UE-STC' },
@@ -8,6 +9,37 @@ defineProps({
 
 const route = useRoute()
 const menuOpen = ref(false)
+
+const isFormal = ref(false)
+const hasCommsAlert = ref(false)
+let commsTimer = null
+
+function checkComms() {
+  const q = parseInt(sessionStorage.getItem('ue-stc-quest') || '0', 10)
+  isFormal.value = q > 0
+
+  if (!isFormal.value) {
+    hasCommsAlert.value = false
+    return
+  }
+
+  const emg = checkEmergencyTimeout() || readEmergency()
+  if (emg && emg.status === 'active') {
+    hasCommsAlert.value = true
+    return
+  }
+
+  hasCommsAlert.value = false
+}
+
+onMounted(() => {
+  checkComms()
+  commsTimer = setInterval(checkComms, 2000)
+})
+
+onUnmounted(() => {
+  if (commsTimer) clearInterval(commsTimer)
+})
 
 function isActive(path) {
   return route.path === path
@@ -30,6 +62,7 @@ watch(() => route.path, closeMenu)
     <nav class="command-header-nav" aria-label="主导航">
       <RouterLink to="/ue-stc/dashboard" class="command-header-link" :class="{ active: isActive('/ue-stc/dashboard') }">首页</RouterLink>
       <RouterLink to="/ue-stc/ops" class="command-header-link" :class="{ active: isActive('/ue-stc/ops') }">行动</RouterLink>
+      <RouterLink v-if="isFormal" to="/ue-stc/comms" class="command-header-link" :class="{ active: isActive('/ue-stc/comms'), alert: hasCommsAlert }">通信</RouterLink>
       <RouterLink to="/ue-stc/intel" class="command-header-link" :class="{ active: isActive('/ue-stc/intel') }">情报</RouterLink>
       <RouterLink to="/ue-stc/about" class="command-header-link" :class="{ active: isActive('/ue-stc/about') }">关于</RouterLink>
     </nav>
@@ -52,6 +85,7 @@ watch(() => route.path, closeMenu)
     <nav class="command-header-dropdown-inner" aria-label="折叠菜单">
       <RouterLink to="/ue-stc/dashboard" class="command-header-dropdown-link" :class="{ active: isActive('/ue-stc/dashboard') }" @click="closeMenu">首页</RouterLink>
       <RouterLink to="/ue-stc/ops" class="command-header-dropdown-link" :class="{ active: isActive('/ue-stc/ops') }" @click="closeMenu">行动</RouterLink>
+      <RouterLink v-if="isFormal" to="/ue-stc/comms" class="command-header-dropdown-link" :class="{ active: isActive('/ue-stc/comms'), alert: hasCommsAlert }" @click="closeMenu">通信</RouterLink>
       <RouterLink to="/ue-stc/intel" class="command-header-dropdown-link" :class="{ active: isActive('/ue-stc/intel') }" @click="closeMenu">情报</RouterLink>
       <RouterLink to="/ue-stc/about" class="command-header-dropdown-link" :class="{ active: isActive('/ue-stc/about') }" @click="closeMenu">关于</RouterLink>
     </nav>
@@ -95,6 +129,17 @@ watch(() => route.path, closeMenu)
 .command-header-link:hover,
 .command-header-link.active {
   color: #888;
+}
+
+.command-header-link.alert {
+  color: #ff4444;
+  animation: pulse-alert 2s infinite;
+}
+
+@keyframes pulse-alert {
+  0% { color: #ff4444; text-shadow: 0 0 5px rgba(255, 68, 68, 0.2); }
+  50% { color: #ff8888; text-shadow: 0 0 15px rgba(255, 68, 68, 0.6); }
+  100% { color: #ff4444; text-shadow: 0 0 5px rgba(255, 68, 68, 0.2); }
 }
 
 .command-header-right {
@@ -186,6 +231,11 @@ watch(() => route.path, closeMenu)
 .command-header-dropdown-link:hover,
 .command-header-dropdown-link.active {
   color: #aaa;
+}
+
+.command-header-dropdown-link.alert {
+  color: #ff4444;
+  animation: pulse-alert 2s infinite;
 }
 
 @media (max-width: 640px) {
