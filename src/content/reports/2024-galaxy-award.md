@@ -1,4 +1,6 @@
-2024 年 9 月 28 日，第 35 届中国科幻银河奖在成都揭晓。电子科技大学科幻协会荣获**最佳科幻团体奖**，这是该校学生社团首次获得该<span class="trigger-word" data-word="奖项" data-code="GALAXY-01">奖项</span>。
+2024 年 9 月 28 日，第 35 届中国科幻银河奖在成都天府国际动漫城揭晓。电子科技大学科幻协会荣获**最佳科幻团体奖**，这是该校学生社团首次获得该<span class="trigger-word" data-word="奖项" data-code="GALAXY-01">奖项</span>。
+
+![第 35 届银河奖最佳科幻团体奖颁奖现场，电子科技大学科幻协会与西安交通大学科幻协会同台领奖](/uestcsfa/images/reports/galaxy-award-best-sci-fi-group-2024.jpg)
 
 <span class="invisible-ink" data-code="PRTCL-01" title="[模因植入：协议开启]">[模因植入：协议开启]</span>
 

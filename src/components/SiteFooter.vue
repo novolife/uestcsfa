@@ -43,40 +43,6 @@ onMounted(() => {
             [ ue-stc ]
           </RouterLink>
         </div>
-        
-        <div class="friendly-links">
-          <a href="https://www.uestc.edu.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
-            电子科技大学
-          </a>
-          <span class="sep">|</span>
-          <a href="https://www.sfw.com.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
-            科幻世界
-          </a>
-          <span class="sep">|</span>
-          <a href="https://www.0gsf.com/" target="_blank" rel="noopener noreferrer" class="link-item">
-            零重力科幻
-          </a>
-          <span class="sep">|</span>
-          <a href="https://csfdb.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
-            中文科幻数据库
-          </a>
-          <span class="sep">|</span>
-          <a href="https://sci.kpcswa.org.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
-            科普科幻青年之星
-          </a>
-          <span class="sep">|</span>
-          <a href="https://khyjzx.crsp.org.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
-            中国科幻研究中心
-          </a>
-          <span class="sep">|</span>
-          <a href="https://hubingsf.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
-            斛兵群星科幻协会
-          </a>
-          <span class="sep">|</span>
-          <a href="https://www.sfjiulong.org/" target="_blank" rel="noopener noreferrer" class="link-item">
-            久隆计划
-          </a>
-        </div>
       </div>
     </div>
   </footer>
@@ -152,33 +118,6 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-}
-
-.friendly-links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
-}
-
-.link-item {
-  color: var(--color-text-mute);
-  text-decoration: none;
-  transition: all 0.3s;
-  opacity: 0.8;
-}
-
-.link-item:hover {
-  color: var(--color-highlight);
-  text-shadow: 0 0 8px var(--color-highlight);
-  opacity: 1;
-}
-
-.sep {
-  color: var(--color-text-mute);
-  opacity: 0.3;
 }
 
 /* 中间 */

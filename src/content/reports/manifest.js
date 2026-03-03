@@ -27,6 +27,12 @@ export default [
       summary: '协会组织《沙丘 2》IMAX 联合观影，围绕影片叙事、影像与主题展开跨校交流。',
     },
     {
+      slug: '2023-lukyanenko-uestc-academic-exchange',
+      title: '欧洲著名科幻大师谢尔盖·卢基扬年科应邀来我校开展学术交流',
+      date: '2023-12',
+      summary: '卢基扬年科做客清水河校区图书馆百学堂，带来《俄罗斯科幻：宇宙与虚拟世界》主题分享，协会参与承办并与师生幻迷同场交流。',
+    },
+    {
       slug: '2023-worldcon-association-participation',
       title: '电子科技大学科幻协会参与第 81 届世界科幻大会交流活动',
       date: '2023-10',
