@@ -42,12 +42,6 @@ const logoSrc = `${import.meta.env.BASE_URL}logo.png`
         </div>
       </div>
 
-      <h2 class="subhead">联系方式</h2>
-      <p>
-        招新一般在每学年开学季进行。请关注校内社团联合招新（百团大战）及学生社团联合会通知，
-        或向已加入协会的同学咨询招新群号。合作与咨询可通过招新通道联系。
-      </p>
-
       <RouterLink to="/about/history" class="history-card">
         <span class="history-card-title">历届社长与干事</span>
         <span class="history-card-desc">查看历年社长及干事名单</span>

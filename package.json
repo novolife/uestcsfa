@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "postbuild": "node scripts/sitemap.js",
+    "download-friend-logos": "node scripts/download-friend-logos.js",
     "preview": "vite preview",
     "lint": "run-s lint:*",
     "lint:oxlint": "oxlint . --fix",
@@ -15,6 +16,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
+    "@fortawesome/free-brands-svg-icons": "^6.5.1",
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/vue-fontawesome": "^3.0.6",
     "marked": "^17.0.2",

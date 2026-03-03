@@ -1,4 +1,4 @@
-2025 年 9 月 20 日上午，「2025 科幻星云嘉年华暨第十六届华语科幻星云奖」于成都科幻馆启幕。电子科技大学数字文化与传媒研究中心主任、科幻与未来科技发展研究中心主任谢梅教授受邀<span class="trigger-word" data-word="出席" data-code="NEBULA-01">出席</span>。
+2025 年 9 月 20 日上午，「2025 科幻星云嘉年华暨第十六届华语科幻星云奖」于成都科幻馆启幕。电子科技大学数字文化与传媒研究中心主任、中国文化产业协会文化元宇宙专业委员会科幻与未来科技发展研究中心主任谢梅教授受邀<span class="trigger-word" data-word="出席" data-code="NEBULA-01">出席</span>。
 
 <span class="invisible-ink" data-code="PRTCL-01" title="[模因植入：协议开启]">[模因植入：协议开启]</span>
 
