@@ -4,6 +4,7 @@ import { RouterLink, useRoute } from 'vue-router'
 
 const route = useRoute()
 const menuOpen = ref(false)
+const logoSrc = `${import.meta.env.BASE_URL}icon-white.png`
 
 const navItems = [
   { path: '/', name: 'CORE' },
@@ -35,7 +36,7 @@ watch(() => route.path, () => {
       <!-- 左侧 LOGO 区域 -->
       <RouterLink to="/" class="logo-area">
         <div class="logo-box">
-          <img src="/uestcsfa/icon-white.png" alt="电子科技大学科幻协会" class="logo-img" width="40" height="40" />
+          <img :src="logoSrc" alt="电子科技大学科幻协会" class="logo-img" width="40" height="40" />
           <span class="logo-text">UESTC-SFA</span>
           <span class="logo-hint">42</span>
         </div>
