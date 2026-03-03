@@ -54,9 +54,7 @@ function fallbackText(name) {
       </p>
       <h2 class="subhead">如何加入</h2>
       <p>
-        招新在每学年开学季进行，届时会有招新摊位和招新群。请关注
-        <a href="https://xgb.uestc.edu.cn" target="_blank" rel="noopener">党委学生工作部</a>及校内社团联合招新通知，
-        或向已加入的同学问招新群号。招新群号与公众号在招新季更新；非招新季可先关注后续动态。
+        招新在每学年开学季进行，届时会有招新摊位和招新群，请关注校内社团联合招新通知。
       </p>
       <h2 class="subhead">你能获得</h2>
       <p>
