@@ -35,7 +35,7 @@ watch(() => route.path, () => {
       <!-- 左侧 LOGO 区域 -->
       <RouterLink to="/" class="logo-area">
         <div class="logo-box">
-          <span class="logo-icon">◈</span>
+          <img src="/uestcsfa/icon-white.png" alt="电子科技大学科幻协会" class="logo-img" width="40" height="40" />
           <span class="logo-text">UESTC-SFA</span>
           <span class="logo-hint">42</span>
         </div>
@@ -152,6 +152,14 @@ watch(() => route.path, () => {
   box-shadow: 0 0 15px rgba(25, 5, 250, 0.4);
 }
 
+.logo-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
 .logo-hint {
   font-size: 0.75rem;
   color: var(--color-text-mute);
@@ -166,17 +174,6 @@ watch(() => route.path, () => {
   opacity: 1;
   color: var(--color-highlight);
   text-shadow: 0 0 5px var(--color-highlight);
-}
-
-.logo-icon {
-  font-size: 1.2rem;
-  color: var(--color-highlight);
-  animation: spin 10s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 .logo-text {

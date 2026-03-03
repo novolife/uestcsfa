@@ -3,6 +3,9 @@ import HomeView from '../views/HomeView.vue'
 
 const AUTH_STORAGE = 'ue-stc-auth'
 
+const DEFAULT_TITLE = '电子科技大学科幻协会'
+const TITLE_SUFFIX = ' | 成电幻协'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -10,26 +13,31 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: { title: '首页' },
     },
     {
       path: '/about',
       name: 'about',
       component: () => import('../views/AboutView.vue'),
+      meta: { title: '关于我们' },
     },
     {
       path: '/activities',
       name: 'activities',
       component: () => import('../views/ActivitiesView.vue'),
+      meta: { title: '活动报道' },
     },
     {
       path: '/activities/reports/:slug',
       name: 'activity-report',
       component: () => import('../views/ActivityReportView.vue'),
+      meta: { title: '活动详情' },
     },
     {
       path: '/join',
       name: 'join',
       component: () => import('../views/JoinView.vue'),
+      meta: { title: '加入我们' },
     },
     {
       path: '/ue-stc',
@@ -112,6 +120,14 @@ const router = createRouter({
 })
 
 router.beforeEach((to, _from, next) => {
+  // SEO：根据路由设置页面标题
+  const title = to.meta?.title
+  if (title) {
+    document.title = `${title}${TITLE_SUFFIX}`
+  } else {
+    document.title = to.meta?.command ? `UE-STC 指挥部${TITLE_SUFFIX}` : DEFAULT_TITLE + TITLE_SUFFIX
+  }
+
   // 如果是指挥部页面，并且不是登录页本身
   if (to.meta.command && to.name !== 'command-login') {
     if (!sessionStorage.getItem(AUTH_STORAGE)) {
