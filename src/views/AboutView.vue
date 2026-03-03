@@ -1,4 +1,5 @@
 <script setup>
+import { RouterLink } from 'vue-router'
 </script>
 
 <template>
@@ -35,6 +36,11 @@
         招新一般在每学年开学季进行。请关注校内社团联合招新（百团大战）及学生社团联合会通知，
         或向已加入协会的同学咨询招新群号。合作与咨询可通过招新通道联系。
       </p>
+
+      <RouterLink to="/about/history" class="history-card">
+        <span class="history-card-title">历届社长与干事</span>
+        <span class="history-card-desc">查看历年社长及干事名单</span>
+      </RouterLink>
     </div>
   </div>
 </template>
@@ -70,6 +76,37 @@
 
 .prose a:hover {
   text-decoration: underline;
+}
+
+.history-card {
+  display: block;
+  margin-top: 2rem;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.history-card:hover {
+  border-color: var(--color-highlight);
+  background: rgba(25, 5, 250, 0.08);
+  box-shadow: 0 4px 12px rgba(25, 5, 250, 0.2);
+}
+
+.history-card-title {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-heading);
+  margin-bottom: 0.35rem;
+}
+
+.history-card-desc {
+  font-size: 0.9rem;
+  color: var(--color-text-mute);
 }
 
 .mascot-grid {

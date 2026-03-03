@@ -22,6 +22,12 @@ const router = createRouter({
       meta: { title: '关于我们' },
     },
     {
+      path: '/about/history',
+      name: 'about-history',
+      component: () => import('../views/AboutHistoryView.vue'),
+      meta: { title: '历届社长与干事' },
+    },
+    {
       path: '/activities',
       name: 'activities',
       component: () => import('../views/ActivitiesView.vue'),
