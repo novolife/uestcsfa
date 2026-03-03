@@ -49,6 +49,14 @@ onMounted(() => {
             电子科技大学
           </a>
           <span class="sep">|</span>
+          <a href="https://www.sfw.com.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
+            科幻世界
+          </a>
+          <span class="sep">|</span>
+          <a href="https://www.0gsf.com/" target="_blank" rel="noopener noreferrer" class="link-item">
+            零重力科幻
+          </a>
+          <span class="sep">|</span>
           <a href="https://csfdb.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
             中文科幻数据库
           </a>
@@ -59,10 +67,6 @@ onMounted(() => {
           <span class="sep">|</span>
           <a href="https://khyjzx.crsp.org.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
             中国科幻研究中心
-          </a>
-          <span class="sep">|</span>
-          <a href="https://www.0gsf.com/" target="_blank" rel="noopener noreferrer" class="link-item">
-            零重力科幻
           </a>
           <span class="sep">|</span>
           <a href="https://hubingsf.cn/" target="_blank" rel="noopener noreferrer" class="link-item">
@@ -129,28 +133,31 @@ onMounted(() => {
   margin: 0 auto;
   padding: 0 1.5rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
 }
 
-/* 左侧 */
 .footer-left {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.25rem;
+  text-align: center;
 }
 
 .copyright {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
 }
 
 .friendly-links {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.5rem;
   font-size: 0.75rem;
   margin-top: 0.25rem;
@@ -213,8 +220,6 @@ onMounted(() => {
 @media (max-width: 768px) {
   .footer-content {
     flex-direction: column;
-    align-items: center;
-    text-align: center;
   }
 }
 </style>
