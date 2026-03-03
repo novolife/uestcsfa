@@ -5,6 +5,7 @@ const AUTH_STORAGE = 'ue-stc-auth'
 
 const DEFAULT_TITLE = '电子科技大学科幻协会'
 const TITLE_SUFFIX = ' | 成电幻协'
+const DEFAULT_DESC = '电子科技大学科幻协会（成电幻协）官方站点。科幻观影、书评沙龙、世界科幻大会参展。探索想象边界，共筑科幻梦想。'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -133,6 +134,16 @@ router.beforeEach((to, _from, next) => {
   } else {
     document.title = to.meta?.command ? `UE-STC 指挥部${TITLE_SUFFIX}` : DEFAULT_TITLE + TITLE_SUFFIX
   }
+
+  // SEO：动态更新 meta description
+  const desc = to.meta?.description ?? DEFAULT_DESC
+  let metaDesc = document.querySelector('meta[name="description"]')
+  if (!metaDesc) {
+    metaDesc = document.createElement('meta')
+    metaDesc.setAttribute('name', 'description')
+    document.head.appendChild(metaDesc)
+  }
+  metaDesc.setAttribute('content', desc)
 
   // 如果是指挥部页面，并且不是登录页本身
   if (to.meta.command && to.name !== 'command-login') {
