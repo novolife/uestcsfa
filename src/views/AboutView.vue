@@ -1,5 +1,7 @@
 <script setup>
 import { RouterLink } from 'vue-router'
+
+const logoSrc = `${import.meta.env.BASE_URL}logo.png`
 </script>
 
 <template>
@@ -20,6 +22,15 @@ import { RouterLink } from 'vue-router'
       <p>
         我们希望能营造校园科幻氛围、鼓励创作与评论、参与高校科幻平台与赛事，并与友校科幻协会及《科幻世界》等机构保持交流。
       </p>
+
+      <h2 class="subhead">社徽</h2>
+      <div class="emblem-wrap">
+        <img :src="logoSrc" alt="电子科技大学科幻协会社徽" class="emblem-img" width="160" height="160" loading="lazy">
+        <p class="emblem-desc">
+          社徽由死星、和平鸽和社团名组成。配色取自死星的灰色与校徽的橙色：死星象征战争，鸽子象征和平，
+          寓意科幻既关照现实冲突，也向往和平与探索。
+        </p>
+      </div>
 
       <h2 class="subhead">社团形象：星璃</h2>
       <p>
@@ -94,6 +105,32 @@ import { RouterLink } from 'vue-router'
   border-color: var(--color-highlight);
   background: rgba(25, 5, 250, 0.08);
   box-shadow: 0 4px 12px rgba(25, 5, 250, 0.2);
+}
+
+.emblem-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.25rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.emblem-img {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.emblem-desc {
+  flex: 1;
+  min-width: 200px;
+  color: var(--color-text);
+  line-height: 1.75;
+  margin: 0;
 }
 
 .history-card-title {

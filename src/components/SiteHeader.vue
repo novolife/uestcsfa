@@ -4,7 +4,7 @@ import { RouterLink, useRoute } from 'vue-router'
 
 const route = useRoute()
 const menuOpen = ref(false)
-const logoSrc = `${import.meta.env.BASE_URL}icon-white.png`
+const logoSrc = `${import.meta.env.BASE_URL}logo-white.png`
 
 const navItems = [
   { path: '/', name: 'CORE' },
