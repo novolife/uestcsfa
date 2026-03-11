@@ -63,7 +63,7 @@ async function onSubmit(e) {
         <button type="submit" class="btn">接入</button>
       </form>
       <p class="hint">门钥于伪装界面中可寻。</p>
-      <p class="back-link"><a href="/">返回协会页面</a></p>
+      <p class="back-link"><RouterLink to="/">返回协会页面</RouterLink></p>
     </div>
   </div>
 </template>
